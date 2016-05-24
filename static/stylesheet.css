@@ -1,0 +1,35 @@
+
+.Board{
+	width:960px;
+	height:480px;
+	z-index: 0;
+	position:absolute;
+	left:50%;
+	top:60%;
+	margin-left:-480px;
+	margin-top: -240px;
+	border-style: outset;
+    border-width: 5px;
+    border-color:#4e2d05;
+}
+
+.Cell{
+	width:32px;
+	height:32px;
+	position:absolute;
+	z-index: 0;
+}
+
+.Player{
+	left:0px;
+	top:0px;
+	width:32px;
+	height:32px;
+	position:absolute;
+	z-index: 1;
+}
+
+img{
+	width:32px;
+	height:32px;
+}
