@@ -9,7 +9,7 @@ define("ip", default="your.ip")
 define("port", default=8888)
 
 #manage user
-class ChatManager(object):
+class Map(object):
     users = []
     @classmethod
     def add_user(cls, websocket):
@@ -20,21 +20,24 @@ class ChatManager(object):
         cls.users.remove(websocket)
 
 # render UI
-class Chat(web.RequestHandler):
+class UI(web.RequestHandler):
     def get(self):
-        self.render("chat.html")
+        self.render("index.html")
 
 # Interacte with client using websockethandler
 class Socket(websocket.WebSocketHandler):
     def open(self):
         # save websocket if connection constructed
         print ' [x] connected.'
-        ChatManager.add_user(self)
+        Map.add_user(self)
+        d = {map: [[1, 2, 3], [4, 5, 6]]}
+        self.write_message(d)
+
     
     def on_close(self):
         # remove websocket of connection closed
         print ' [x] disconnected.'
-        ChatManager.remove_user(self)
+        Map.remove_user(self)
     
     def on_message(self, message):
         # send message to other WebSocket if some one send a message
@@ -43,8 +46,8 @@ class Socket(websocket.WebSocketHandler):
         #print d.user + ': ' + d.msg_input
         print "haha"
         print d
-        
-        for user in ChatManager.users:
+        d = {map: [[1, 2, 3], [4, 5, 6]]}
+        for user in Map.users:
             user.write_message(message)
 
 # setting parameter
@@ -59,7 +62,7 @@ settings = dict(
 class Application(web.Application):
     def __init__(self):
         handlers = [
-                    (r"/", Chat),
+                    (r"/", UI),
                     (r"/socket", Socket)
                     ]
         web.Application.__init__(self, handlers, **settings)

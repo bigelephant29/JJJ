@@ -1,6 +1,42 @@
 var board = [];
 var piece = [];
 var boardPiece;
+var me = {elem:$('#me'),playerName:"test",x:0,y:0};
+
+var connectObj = {
+host: location.host,
+socket: null,
+    
+init: function(){
+    $("#message").append(connectObj.host + "<br/>");
+    var url = "ws://" + connectObj.host + "/socket";
+    connectObj.socket = new WebSocket(url);
+    connectObj.socket.onmessage = function(event){
+        connectObj.showMsg(event.data);
+    },
+    connectObj.socket.onclose = function(event){
+        console.log("on close");
+    },
+    connectObj.socket.onerror = function(event){
+        console.log("on error");
+    }
+},
+sendMsg: function(){
+    
+    var msg = {playerObj:me};
+    //alert("ddddddd");
+    $("#message").append(connectObj.host);
+    connectObj.socket.send(JSON.stringify(msg));
+    //alert("dddd");
+    
+},
+showMsg: function(message){
+    var data = JSON.parse(message);
+    
+    $("#message").append(data.playerObj.playerName+"<br/>");
+}
+};
+
 
 function initBoard(){
     boardPiece = document.getElementById("board");
@@ -46,7 +82,7 @@ function showBoard(){
 
 }
 
-function playerKeyDown(me,conObj){
+function playerKeyDown(){
     $(document).keydown(function(key) {
         switch(parseInt(key.which,10)) {
             // Left arrow key pressed
@@ -79,47 +115,14 @@ function playerKeyDown(me,conObj){
                 break;
         }
         //alert("ddddd");
-        conObj.sendMsg();
+        connectObj.sendMsg();
     });
 }
 
 $(document).ready(function() {
-    var Me = {elem:$('#me'),playerName:"test",x:0,y:0};
-    var connectObj = {
-        host: location.host,
-        socket: null,
-
-        init: function(){
-            $("#message").append(connectObj.host + "<br/>");
-            var url = "ws://" + connectObj.host + "/socket";
-            connectObj.socket = new WebSocket(url);
-            connectObj.socket.onmessage = function(event){
-                connectObj.showMsg(event.data);
-            },
-            connectObj.socket.onclose = function(event){
-                console.log("on close");
-            },
-            connectObj.socket.onerror = function(event){
-                console.log("on error");
-            }
-        },
-        sendMsg: function(){
-            
-            var msg = {playerObj:Me};
-            //alert("ddddddd");
-            $("#message").append(connectObj.host);
-            connectObj.socket.send(JSON.stringify(Me));
-            alert("dddd");
-            
-        },
-        showMsg: function(){
-            var data = JSON.parse(message);
-
-            $("#message").append(data.playerObj.playerName+"<br/>");
-        }
-    };
-
+    
+    connectObj.init();
     initBoard();
-    playerKeyDown(Me,connectObj);
+    playerKeyDown();
     
 });
