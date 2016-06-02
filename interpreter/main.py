@@ -1,13 +1,43 @@
 from enum import Enum
 import queue
+from pyparsing import Word, nums, alphas, Combine, oneOf, opAssoc, operatorPrecedence
 
 class JJJInterpreter:
      
-    def __init__(self):
+    def __init__(self, buff_size = 3):
+        
+        # CONFIG
+        self.BUFF_SIZE = buff_size # How much prediction will be made by the interpreter
+        self.REGISTER_NO = 4       # How many registers are available for a player
+        
+        # DON'T MODIFY
         self.isLabeled = 0
         self.commandList = []
-        self.register = [-999, 0, 0, 0, 0]   
+        self.register = {}
+        self.registerMap = {}
+        for i in range(1, self.REGISTER_NO + 1):
+            key = '$' + str(i)
+            value = chr( ord('A') + i - 1 )
+            self.register[value] = 0
+            self.registerMap[key] = value
         self.buffQueue = queue.Queue()
+        # define the parser
+        self.integer = Word(nums)
+        self.variable = Word(alphas,exact=1)
+        self.operand = self.integer | self.variable
+        
+        self.signop = oneOf('+ -')
+        self.multop = oneOf('* /')
+        self.plusop = oneOf('+ -')
+        
+        # use parse actions to attach EvalXXX constructors to sub-expressions
+        self.operand.setParseAction(self.EvalConstant)
+        self.arith_expr = operatorPrecedence(self.operand,
+            [
+             (self.signop, 1, opAssoc.RIGHT, self.EvalSignOp),
+             (self.multop, 2, opAssoc.LEFT, self.EvalMultOp),
+             (self.plusop, 2, opAssoc.LEFT, self.EvalAddOp),
+            ])
         
     # Enum Class for command types
     class CommandType(Enum):
@@ -20,59 +50,83 @@ class JJJInterpreter:
         label = 6
         assign = 7
         debug_print = 999
-     
-    # Function for parsing a single element (not a expression)
-    def getElementValue(self, exp):
-        # Case for self.register element
-        if exp[0] == '$':
-            if len(exp) != 2:
-                return None
-            if exp[1] not in ['1', '2', '3', '4']:
-                return None
-            return self.register[ord(exp[1]) - ord('0')]
-        # Case for constant element
-        try:
-            val = int(exp)
-        except ValueError:
-            return None
-        return val
         
-    # Function for evaluating the value of a expression
-    def parseRightExpr(self, exp):
-        operatorList = ["+", "-", "*", "/"]
-        operatorType = None
-        operatorIndex = 0
-        # Check if the expression contains an operator in operator list
-        for i in operatorList:
-            operatorIndex = exp.rfind(i)
-            if operatorIndex != -1:
-                operatorType = i
+    def operatorOperands(self, tokenlist):
+        it = iter(tokenlist)
+        while 1:
+            try:
+                yield (next(it), next(it))
+            except StopIteration:
                 break
-        # Deal with the leading '-' for some constant expressions
-        if operatorType == '-' and operatorIndex == 0:
-            operatorType = None;
-        # Case for constant expression
-        if operatorType == None:
-            return self.getElementValue(exp)
-        # Case for non-constant expression
-        expressionElement = exp.split(operatorType)
-        val1 = self.getElementValue(expressionElement[0])
-        val2 = self.getElementValue(expressionElement[1])
-        if val1 == None or val2 == None:
-            return None
-        if operatorType == "+":
-            return val1 + val2
-        elif operatorType == "-":
-            return val1 - val2
-        elif operatorType == "*":
-            return val1 * val2
-        elif operatorType == "/":
-            return val1 / val2
-            
-    # Function for sending command to interpreter, return 1 on success, 0 on fail
-    def addCommand(self, cmd):
+        
+    class EvalConstant(object):
+        variables = {}
+        def __init__(self, tokens):
+            self.value = tokens[0]
+        def eval(self):
+            if self.value in self.EvalConstant.variables:
+                return self.EvalConstant.variables[self.value]
+            else:
+                return int(float(self.value))
+                
+    class EvalSignOp(object):
+        def __init__(self, tokens):
+            self.sign, self.value = tokens[0]
+        def eval(self):
+            mult = {'+':1, '-':-1}[self.sign]
+            return mult * self.value.eval()
+        
+    class EvalMultOp(object):
+        def __init__(self, tokens):
+            self.value = tokens[0]
+        def eval(self):
+            prod = self.value[0].eval()
+            for op,val in self.operatorOperands(self.value[1:]):
+                if op == '*':
+                    prod *= val.eval()
+                if op == '/':
+                    prod /= val.eval()
+            return int(prod)
+        
+    class EvalAddOp(object):
+        def __init__(self, tokens):
+            self.value = tokens[0]
+        def eval(self):
+            sum = self.value[0].eval()
+            for op,val in self.operatorOperands(self.value[1:]):
+                if op == '+':
+                    sum += val.eval()
+                if op == '-':
+                    sum -= val.eval()
+            return sum
+        
+    def commandTranslate(self, cmd):
         # Remove spaces in command
         cmd = cmd.replace(" ", "")
+        # Replace the register name with its variable name in interpreter
+        for key, value in self.registerMap.items():
+            cmd = cmd.replace(key, value)
+        return cmd
+        
+    def procAssignCmd(self, cmd):
+        cmd = cmd.split('=')
+        # Parse left expression
+        if len(cmd[0]) > 1 or len(cmd[0]) == 0:
+            return 0
+        if ord(cmd[0]) not in range(ord('A'), ord('A') + self.REGISTER_NO - 1):
+            return 0
+        try:
+            self.register[cmd[0]] = eval(cmd[1], self.register)
+            print (cmd[0] + '=' + str(self.register[cmd[0]]))
+            return 1
+        except:
+            return 0
+        
+    # Function for adding command to interpreter, return 1 on success, 0 on fail
+    def addCommand(self, cmd):
+        newCommand = cmd
+        # Translate command first
+        cmd = self.commandTranslate(cmd)
         # Try to find "=" in command
         equalLocation = cmd.find("=")
         # equalLocation == -1  means the command is not a assignment
@@ -94,48 +148,30 @@ class JJJInterpreter:
                 if self.isLabeled == 1:
                     self.commandList.append((self.CommandType.jump,));
             elif cmd == "label":
-                print(len(self.commandList))
                 # Set a label for jump
                 if ( len(self.commandList) > 0 ):
                     del self.commandList[:]
                 # Set labeled flag
                 self.isLabeled = 1
             else:
-                print ('[ERROR] Invalid Input: ', cmd)
+                print ('[ERROR] Invalid Input: ', newCommand)
                 return 0
         else:
             # Assign/Operation Type
             nowCommand = (self.CommandType.assign, cmd)
-            cmd = cmd.split('=')
-            # print=$1 command is for debugging
-            if cmd[0] == 'print':
-                if len(cmd[1]) == 2 and cmd[1][0] == '$' and cmd[1][1] in ['1', '2', '3', '4']:
-                    print ('value of ' + cmd[1] + ' = ' + str(self.register[ord(cmd[1][1])-ord('0')]))
-            elif cmd[0][0] == '$':
-                if cmd[0][1] in ['1', '2', '3', '4']:
-                    # Parse the assignment
-                    regNum = ord(cmd[0][1]) - ord('0')
-                    expressionVal = self.parseRightExpr(cmd[1])
-                    # If there are some mistakes in the expression, expressionVal will be None
-                    if expressionVal != None:
-                        # Valid expression
-                        self.register[regNum] = expressionVal
-                        self.commandList.append(nowCommand)
-                    else:
-                        print ('[ERROR] Invalid Input: ', nowCommand[1])
-                        return 0
-                else:
-                    print ('[ERROR] Invalid Input: ', nowCommand[1])
-                    return 0
+            ret = self.procAssignCmd(cmd)
+            if ret == 1:
+                self.commandList.append(nowCommand)
             else:
-                print ('[ERROR] Invalid Input: ', nowCommand[1])
+                print ('[ERROR] Invalid Input: ', newCommand)
                 return 0
         return 1
 
     # Function for getting a command from buffer
     def getCommand(self):
         if self.buffQueue.empty:
-            print('[ERROR] No buffed command')
+            #print('[ERROR] No buffed command')
+            pass
         else:
             return self.buffQueue.get()
         
