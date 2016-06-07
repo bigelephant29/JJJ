@@ -32,8 +32,10 @@ sendMsg: function(){
 },
 showMsg: function(message){
     var data = JSON.parse(message);
-    
-    $("#message").append(data.playerObj.playerName+"<br/>");
+    for(key in data){
+        $("#message").append(data[key] + "<br/>");
+    }
+    //$("#message").append(data.playerObj.playerName+"<br/>");
 }
 };
 
