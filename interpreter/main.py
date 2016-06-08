@@ -210,6 +210,7 @@ class JJJInterpreter:
                     self.commandList.append((self.CommandType.jump,));
                 else:
                     print ('[ERROR] No label for jumping')
+                    return 0
             elif cmd == 'label':
                 # Set a label for jump
                 if ( len(self.commandList) > 0 ):
