@@ -217,7 +217,7 @@ class Socket(websocket.WebSocketHandler):
             self.close()
         
         
-        self.id = randint(0, 10000)
+        self.id = Map.user_count
         thread = userThread(self.id)
         Map.add_user(self.id, self, thread)
         
@@ -226,6 +226,7 @@ class Socket(websocket.WebSocketHandler):
         d = {"myname": self.id, "map": Map.map, "position": [Map.users[self.id].position[0], Map.users[self.id].position[1]]}
         self.write_message(d)
         print(d["position"])
+        print(d['myname'])
         print (str(self.id) + ' [x] connected. User number: ' + str(Map.user_count))
     
     def on_close(self):

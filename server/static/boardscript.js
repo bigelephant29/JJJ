@@ -5,6 +5,7 @@ var userinit;
 var move;
 var score;
 var BoardObj;
+var Me;
 
 var board = [];
 var board_position = [];
@@ -36,16 +37,19 @@ var conObj = {
         showMsg: function(message){
             var data = JSON.parse(message);
             //$("#message").append(data.playerObj.playerName+"<br/>");
+            $("#message").append(data + "<br/>");
             for(key in data){
                 switch(key){
                     case "map"://map[][]
                         super_Board = data[key];
                         BoardObj = {elem:$('#board'),x:0,y:0};
-                        BoardObj.elem.css({"top":"-480px","left":"-960px"});
+                        //BoardObj.elem.css({"top":"-480px","left":"-960px"});
                         initBoard();
                         break;
                     case "myname"://myname
+
                         myname = data[key];
+                        alert("myname" + myname);
                         break;
                     case "username"://username[]
                         username = data[key];
@@ -60,6 +64,13 @@ var conObj = {
                         break;
                     case "score":
                         score = data[key];
+                        break;
+                    case "position":
+                        var p = new playerObj(myname,myname,data[key][1],data[key][0]);
+                        playerObjArr[myname] = p;
+                        playerObjArr[myname].elem.css("zIndex", 90-myname);
+                        moveMe(playerObjArr[myname],0,15);
+                        moveMe(playerObjArr[myname],1,30);
                         break;
                     default:
                         alert("showMsg error!");
@@ -101,15 +112,18 @@ function playerObj(playerName,playerNum,x,y){
 }
 function createPlayer(username,userinit){
     for(var i = 0; i < username.length; i++){
-        var p = new playerObj(username[i],i,0,0);
-        playerObjArr.push(p);
-        playerObjArr[i].elem.css("zIndex", 90-i);
-        //moveMe(playerObjArr[i],0,userinit[i].y);
-        //moveMe(playerObjArr[i],1,userinit[i].x);
-        moveMe(playerObjArr[i],0,15);
-        moveMe(playerObjArr[i],1,30);
+        if(username[i]!=myname){
+            var p = new playerObj(username[i],i,0,0);
+            playerObjArr[i] = p;
+            playerObjArr[i].elem.css("zIndex", 90-i);
+            //moveMe(playerObjArr[i],0,userinit[i].y);
+            //moveMe(playerObjArr[i],1,userinit[i].x);
+            moveMe(playerObjArr[i],0,15);
+            moveMe(playerObjArr[i],1,30);
 
-        //alert(playerObjArr[i].elem.css('zIndex'));
+            //alert(playerObjArr[i].elem.css('zIndex'));
+        }
+
     }
 }
 
@@ -142,7 +156,6 @@ function showBoard(){
     for(var y=0;y<45;y++){
         for(var x=0;x<90;x++){
             var ran=Math.floor((Math.random() * 9))
-            /*
             if(map[y][x]==0){
                 clonePiece = piece[0].cloneNode(true);
             }
@@ -158,7 +171,7 @@ function showBoard(){
             else{
                 
             }
-            */
+            /*
             if(ran==2){
                 clonePiece = piece[2].cloneNode(true);
             }
@@ -172,7 +185,7 @@ function showBoard(){
                 else{
                     clonePiece = piece[0].cloneNode(true);
                 }
-            }
+            }*/
             clonePiece.id = x+","+y;
             board_position[y].push(clonePiece.id);
             clonePiece.onclick = function(){
@@ -303,7 +316,7 @@ $(document).ready(function() {
 
     conObj.init()
     
-    myname = 0;
+    /*myname = 0;
     username.push("Me");
     username.push("R2D2");
     username.push("Trooper");
@@ -315,6 +328,6 @@ $(document).ready(function() {
     moveMe(playerObjArr[2],0,7);
     moveMe(playerObjArr[3],1,15);
     moveMe(playerObjArr[3],0,7);
-    moveMe(playerObjArr[3],0,-7);
+    moveMe(playerObjArr[3],0,-7);*/
 
 });
