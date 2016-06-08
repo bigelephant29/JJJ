@@ -12,7 +12,7 @@ import threading
 
 import sys
 sys.path.insert(0, '../interpreter')
-import main as interpreter
+import JJJInterpreter as interpreter
 
 define("ip", default="your.ip")
 define("port", default=8888)
