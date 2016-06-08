@@ -27,3 +27,11 @@ python3 interpreter/JJJInterpreter.py
 ```
 
 If you failed to install pyparsing, or you failed to run JJJInterpreter.py, please refer to [this page](http://pyparsing.wikispaces.com/Download+and+Installation).
+
+After successfully installed the tools, just run the server
+```
+python3 server/server.py
+```
+Then you can visit localhost:8888/ to test the server.
+
+The default port is 8888, you can modify it in server/server.py.
