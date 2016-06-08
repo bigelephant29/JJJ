@@ -34,9 +34,10 @@ class Map(object):
     belong = []
     user_count = 0
     
+    
     @classmethod
     def add_user(cls, id, websocket, thread):
-        cls.users[id] = User(id, websocket, thread, randint(0, 44), randint(0, 89))
+        cls.users[id] = User(id, websocket, thread, randint(15, 29), randint(30, 59))
         cls.belong[cls.users[id].position[0]][cls.users[id].position[1]] = id
         #cls.users[id] = {'socket': websocket, 'thread': thread, 'position': [randint(0, 44), randint(0, 89)]}
         #cls.belong[cls.users[id]['position'][0]][cls.users[id]['position'[1]]] = id
@@ -223,10 +224,15 @@ class Socket(websocket.WebSocketHandler):
         
         thread.start()
                 
-        d = {"myname": self.id, "map": Map.map, "position": [Map.users[self.id].position[0], Map.users[self.id].position[1]]}
+                #d = {"myname": self.id, "map": Map.map, "position": [Map.users[self.id].position[0], Map.users[self.id].position[1]]}
+        d = {"map": Map.map}
+        self.write_message(d)
+        d = {"myname": self.id}
+        self.write_message(d)
+        d = {"position": [Map.users[self.id].position[0], Map.users[self.id].position[1]]}
         self.write_message(d)
         print(d["position"])
-        print(d['myname'])
+        #print(d['myname'])
         print (str(self.id) + ' [x] connected. User number: ' + str(Map.user_count))
     
     def on_close(self):

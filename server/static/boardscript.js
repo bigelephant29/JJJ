@@ -37,19 +37,19 @@ var conObj = {
         showMsg: function(message){
             var data = JSON.parse(message);
             //$("#message").append(data.playerObj.playerName+"<br/>");
-            $("#message").append(data + "<br/>");
+            //$("#message").append(data + "<br/>");
             for(key in data){
                 switch(key){
                     case "map"://map[][]
                         super_Board = data[key];
                         BoardObj = {elem:$('#board'),x:0,y:0};
-                        //BoardObj.elem.css({"top":"-480px","left":"-960px"});
+                        BoardObj.elem.css({"top":"-480px","left":"-960px"});
                         initBoard();
                         break;
                     case "myname"://myname
 
                         myname = data[key];
-                        alert("myname" + myname);
+                        alert("myname " + myname);
                         break;
                     case "username"://username[]
                         username = data[key];
@@ -66,11 +66,16 @@ var conObj = {
                         score = data[key];
                         break;
                     case "position":
-                        var p = new playerObj(myname,myname,data[key][1],data[key][0]);
+                        alert("myname: " + myname);
+                        var p = new playerObj(myname,myname,data[key][0],data[key][1]);
+                        
                         playerObjArr[myname] = p;
                         playerObjArr[myname].elem.css("zIndex", 90-myname);
-                        moveMe(playerObjArr[myname],0,15);
-                        moveMe(playerObjArr[myname],1,30);
+                        moveMe(playerObjArr[myname],0,data[key][0]);
+                        moveMe(playerObjArr[myname],1,data[key][1]);
+                        alert("0x:"+data[key][1]+" 0y:"+data[key][0]);
+                        alert("x:"+playerObjArr[myname].x+" y:"+playerObjArr[myname].y);
+
                         break;
                     default:
                         alert("showMsg error!");
@@ -83,10 +88,10 @@ var conObj = {
 
 //class
 function playerObj(playerName,playerNum,x,y){
-    this.playerName = playerName;
+    this.playerName = String(playerName);
     this.playerNum = playerNum;
-    this.x = x;
-    this.y = y;
+    this.x = 0;
+    this.y = 0;
 
     var playerImg;
     switch(playerNum){
@@ -116,10 +121,10 @@ function createPlayer(username,userinit){
             var p = new playerObj(username[i],i,0,0);
             playerObjArr[i] = p;
             playerObjArr[i].elem.css("zIndex", 90-i);
-            //moveMe(playerObjArr[i],0,userinit[i].y);
-            //moveMe(playerObjArr[i],1,userinit[i].x);
-            moveMe(playerObjArr[i],0,15);
-            moveMe(playerObjArr[i],1,30);
+            moveMe(playerObjArr[i],0,userinit[i].y);
+            moveMe(playerObjArr[i],1,userinit[i].x);
+            //moveMe(playerObjArr[i],0,15);
+            //moveMe(playerObjArr[i],1,30);
 
             //alert(playerObjArr[i].elem.css('zIndex'));
         }
@@ -156,16 +161,16 @@ function showBoard(){
     for(var y=0;y<45;y++){
         for(var x=0;x<90;x++){
             var ran=Math.floor((Math.random() * 9))
-            if(map[y][x]==0){
+            if(super_Board[y][x]==0){
                 clonePiece = piece[0].cloneNode(true);
             }
-            else if(map[y][x]==1){
+            else if(super_Board[y][x]==1){
                 clonePiece = piece[0].cloneNode(true);
             }
-            else if(map[y][x]==2){
+            else if(super_Board[y][x]==2){
                 clonePiece = piece[2].cloneNode(true);
             }
-            else if(map[y][x]==3){
+            else if(super_Board[y][x]==3){
                 clonePiece = piece[3].cloneNode(true);
             }
             else{
@@ -224,32 +229,38 @@ function movePlayers(move){
 }
 function moveMe(me,left,mv){
     if(left==1){
-        me.elem.animate({left:"+="+mv*32+"px"},'slow');
-        if(mv>0){
-            if((me.x % 30) == 29){
-                moveBoard(BoardObj,1,-30);
+        if(me.x+mv > 0 && me.x+mv < 89){
+            me.elem.animate({left:"+="+mv*32+"px"},'fast');
+            if(mv>0){
+                if((me.x % 30) == 29){
+                    moveBoard(BoardObj,1,-30);
+                }
             }
-        }
-        else{
-            if((me.x % 30) == 0){
-                moveBoard(BoardObj,1,30);
+            else{
+                if((me.x % 30) == 0){
+                    moveBoard(BoardObj,1,30);
+                }
             }
+            me.x+=mv;
+            alert("me.x:"+me.x);
         }
-        me.x+=mv;
     }
     else{
-        me.elem.animate({top:"+="+mv*32+"px"},'slow');
-        if(mv>0){
-            if((me.y % 15) == 14){
-                moveBoard(BoardObj,0,-15);
+        if(me.y+mv > 0 && me.y+mv < 44){
+            me.elem.animate({top:"+="+mv*32+"px"},'fast');
+            if(mv>0){
+                if((me.y % 15) == 14){
+                    moveBoard(BoardObj,0,-15);
+                }
             }
-        }
-        else{
-            if((me.y % 15) == 0){
-                moveBoard(BoardObj,0,15);
+            else{
+                if((me.y % 15) == 0){
+                    moveBoard(BoardObj,0,15);
+                }
             }
+            me.y+=mv;
+            alert("me.y:"+me.y);
         }
-        me.y+=mv;
     }
 }
 
