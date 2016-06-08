@@ -30,7 +30,7 @@ class User:
 class Map(object):
     users = {}
     id_list = []
-    map = []
+    mymap = []
     belong = []
     user_count = 0
     
@@ -62,20 +62,20 @@ class Map(object):
             for j in range(90):
                 tmp.append(randint(0, 3))
                 tmp2.append(-1)
-            cls.map.append(tmp)
+            cls.mymap.append(tmp)
             cls.belong.append(tmp2)
 
     @classmethod
     def move(cls, id, dir):
-        if(direction == 'r'):
+        if(dir == 'r'):
             cls.users[id].position[1] += 1
-        elif(direction == 'l'):
+        elif(dir == 'l'):
             cls.users[id].position[1] -= 1
-        elif(direction == 'u'):
-            cls.users[id].position[0] += 1
-        elif(direction == 'd'):
+        elif(dir == 'u'):
             cls.users[id].position[0] -= 1
-        elif(direction == 'h'):
+        elif(dir == 'd'):
+            cls.users[id].position[0] += 1
+        elif(dir == 'h'):
             pass
         else:
             print("ERROR:Bad movement")
@@ -84,22 +84,23 @@ class Map(object):
 
     @classmethod
     def checkMoveIntegraty(cls, id, direction):
-        position = [cls.users[id].position[0], cls.users[id].position[1]]
+        position = cls.users[id].position[:]
+        #position = [cls.users[id].position[0], cls.users[id].position[1]]
         if(direction == 'r'):
             position[1] += 1
         elif(direction == 'l'):
             position[1] -= 1
         elif(direction == 'u'):
-            position[0] += 1
-        elif(direction == 'd'):
             position[0] -= 1
+        elif(direction == 'd'):
+            position[0] += 1
         elif(direction == 'h'):
             pass
         else:
             print("ERROR:Bad direction")
-
+        
         #To Do: check if rock == 3
-        if(position[0] < 45 and position[0] >= 0 and position[1] < 90 and position[1] >= 0 and map[position[0]][position[1]] != 3):
+        if(position[0] < 45 and position[0] >= 0 and position[1] < 90 and position[1] >= 0 and cls.mymap[position[0]][position[1]] != 3):
             return True
         else:
             return False
@@ -143,8 +144,9 @@ class userThread(threading.Thread):
     
     def run(self):
         inte = interpreter.JJJInterpreter()
-    
+        cnt = 0
         while not exitFlag:
+            cnt += 1
             if(len(self.command) == 0):
                 continue
 
@@ -156,7 +158,13 @@ class userThread(threading.Thread):
                     isCompute = True
                 elif(cmd == "change"):
                     isChange = True
-            
+                        
+            if isChange:
+                #change code interprete by inte
+                inte.sendCommand(self.code)
+        
+                #print("Code changed!! " + str(cnt))
+
             if isCompute:
                 #compute user movement
                 dir = inte.getCommand()
@@ -169,6 +177,8 @@ class userThread(threading.Thread):
                     dir = 'l'
                 if dir == inte.CommandType.right:
                     dir = 'r'
+                if dir == None:
+                    dir = 'h'
                 
                 if Map.checkMoveIntegraty(self.id, dir):
                     self.direction = dir
@@ -178,18 +188,14 @@ class userThread(threading.Thread):
                 Map.move(self.id, self.direction)
                 self.ready = True
 
-                print("Action computed!!")
+                #print("Action computed!! " + str(cnt))
 
-            if isChange:
-                #change code interprete by inte
-                inte.addCommand(self.code)
-        
-                print("Code changed!!")
-    
+               
 
     def computeAction(self):
         self.ready = False
         self.command.append("compute")
+        print("compute")
 
     def getAction(self):
         while not self.ready:
@@ -199,6 +205,7 @@ class userThread(threading.Thread):
     def changeCode(self, code):
         self.code = code
         self.command.append("change")
+        print("change")
         
 ###########################################
 
@@ -213,7 +220,7 @@ class Socket(websocket.WebSocketHandler):
     def open(self):
         print("haha")
         # save websocket if connection constructed
-        if(Map.user_count >= 4):
+        if(Map.user_count >= 1):
             print("user number exceeded, connection closing...")
             self.close()
         
@@ -225,7 +232,7 @@ class Socket(websocket.WebSocketHandler):
         thread.start()
                 
                 #d = {"myname": self.id, "map": Map.map, "position": [Map.users[self.id].position[0], Map.users[self.id].position[1]]}
-        d = {"map": Map.map}
+        d = {"map": Map.mymap}
         self.write_message(d)
         d = {"myname": self.id}
         self.write_message(d)
@@ -282,23 +289,28 @@ class Application(web.Application):
 ######################################
 def clock(delay):
     
-    while Map.user_count < 4:
+    while Map.user_count < 1:
         pass
     
     print("user preparing...")
 
-    count = 30
+    count = 5
+    short_command = "up\ndown\nleft\nright"
+
     while count > 0:
         print (count)
         time.sleep(delay)
         count -= 1
-    
+
+    print("game start!!")
     userinit = []
     for user in Map.id_list:
         userinit.append([Map.users[user].position[0], Map.users[user].position[1]])
 
     for user in Map.users:
-        Map.users[user].socket.write_message({'username': Map.id_list, 'userinit': userinit})
+        Map.users[user].socket.write_message({'username': Map.id_list})
+        Map.users[user].socket.write_message({'userinit': userinit})
+        Map.users[user].thread.changeCode(short_command)
 
     count = 120
     while count > 0:
@@ -310,6 +322,12 @@ def clock(delay):
         #get computed action
         for user in Map.users:
             action[user] = Map.users[user].thread.getAction()
+            print(str(user) + " " + action[user])
+            print(Map.users[user].position)
+            print("up: " + str(Map.mymap[Map.users[user].position[0] - 1][Map.users[user].position[1]]))
+            print("down: " + str(Map.mymap[Map.users[user].position[0] + 1][Map.users[user].position[1]]))
+            print("left: " + str(Map.mymap[Map.users[user].position[0]][Map.users[user].position[1] - 1]))
+            print("right: " + str(Map.mymap[Map.users[user].position[0]][Map.users[user].position[1] + 1]))
 
         message = {}
         #check if occupy
@@ -321,7 +339,7 @@ def clock(delay):
 
         #send user information
         for user in Map.users:
-            Map.users[user].socket.write_message(message)
+            Map.users[user].socket.write_message({'move': message})
 
         time.sleep(delay)
 
