@@ -174,8 +174,6 @@ class JJJInterpreter:
     # Function for adding command to interpreter, return 1 on success, 0 on fail
     def addCommand(self, cmd):
         newCommand = cmd
-        # Translate command first
-        cmd = self.commandTranslate(cmd)
         if self.isJumped and cmd != 'label':
             print ('[ERROR] You have to set a new label first')
             return 0
@@ -236,6 +234,57 @@ class JJJInterpreter:
                 return 0
         return 1
         
+    # Function for checking the validation of multiline input    
+    def sendCommand(self, cmd):
+        tmpisJumped = self.isJumped
+        tmpisLabeled = self.isLabeled
+        newCommand = cmd.split('\n')
+        for i in range(0, len(newCommand)):
+            # Translate command first
+            saveCommand = newCommand[i]
+            newCommand[i] = self.commandTranslate(newCommand[i])
+            if len(newCommand[i]) == 0:
+                continue
+            if tmpisJumped and newCommand[i] != 'label':
+                print ('[ERROR] You have to set a new label first')
+                return i
+            # Try to find '=' in command
+            equalLocation = newCommand[i].find('=')
+            # equalLocation == -1  means the command is not a assignment
+            if equalLocation == -1:
+                # Command Types
+                if newCommand[i] == 'up':
+                    pass
+                elif newCommand[i] == 'down':
+                    pass
+                elif newCommand[i] == 'left':
+                    pass
+                elif newCommand[i] == 'right':
+                    pass
+                elif newCommand[i] == 'jump':
+                    if  tmpisLabeled == 1:
+                        tmpisJumped = 1
+                    else:
+                        print ('[ERROR] No label for jumping')
+                        return i
+                elif newCommand[i] == 'label':
+                    tmpisLabeled = 1
+                    tmpisJumped = 0
+                else:
+                    print ('[ERROR] Invalid Input: ', saveCommand)
+                    return i
+            else:
+                # Assign/Operation Type
+                ret = self.procAssignCmd(newCommand[i])
+                if ret == 1:
+                    pass
+                else:
+                    print ('[ERROR] Invalid Input: ', saveCommand)
+                    return i
+        for line in newCommand:
+            self.addCommand(line)
+        return -1
+        
     # Function for getting a command from buffer
     def getCommand(self):
         if self.buffQueue.empty():
@@ -255,6 +304,7 @@ class JJJInterpreter:
         
 def main():
     inte = JJJInterpreter()
+    inte.sendCommand('up\ndown\nleft\nright\nfuck')
     while True:
         inputString = input()
         if inputString == 'print':
@@ -262,7 +312,7 @@ def main():
         elif inputString == 'get':
             print(inte.getCommand())
         else:
-            inte.addCommand(inputString)
+            inte.sendCommand(inputString)
         
 if __name__ == '__main__':
     main()
