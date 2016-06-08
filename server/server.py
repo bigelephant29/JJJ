@@ -10,6 +10,10 @@ import time
 import _thread
 import threading
 
+import sys
+sys.path.insert(0, '../interpreter')
+import main as interpreter
+
 define("ip", default="your.ip")
 define("port", default=8888)
 
@@ -44,6 +48,7 @@ class Map(object):
     
     @classmethod
     def remove_user(cls, id):
+        
         del cls.users[id]
         cls.id_list.remove(id)
         cls.user_count -= 1
@@ -98,14 +103,37 @@ class Map(object):
         else:
             return False
 
-###########thread for user parsing############
+    @classmethod
+    def scoring():
+        score = {}
+        for user in id_list:
+            score[user] = 0
 
-#To do: connect with parser
+        for row in belong:
+            for id in row:
+                if id == -1:
+                    continue
+                score[id] += 1
+
+        return score
+
+
+########## thread for user parsing ##########
+# Each user run a thread, looping to check  #
+# if there is any command in command list   #
+# and execute. Main thread call the member  #
+# function to append command to the command #
+# list, awake user thread to excute the     #
+# command.                                  #
+#############################################
+
+#To do: connect with parser, done
 
 exitFlag = 0;
 
 class userThread(threading.Thread):
     def __init__(self, id):
+        threading.Thread.__init__(self)
         self.id = id
         self.command = []
         self.code = ""
@@ -113,6 +141,8 @@ class userThread(threading.Thread):
         self.ready = True
     
     def run(self):
+        inte = interpreter.JJJInterpreter()
+    
         while not exitFlag:
             if(len(self.command) == 0):
                 continue
@@ -127,9 +157,18 @@ class userThread(threading.Thread):
                     isChange = True
             
             if isCompute:
-                '''interprete
-                dir = interpretor.compute()
-                '''
+                #compute user movement
+                dir = inte.getCommand()
+        
+                if dir == inte.CommandType.up:
+                    dir = 'u'
+                if dir == inte.CommandType.down:
+                    dir = 'd'
+                if dir == inte.CommandType.left:
+                    dir = 'l'
+                if dir == inte.CommandType.right:
+                    dir = 'r'
+                
                 if Map.checkMoveIntegraty(self.id, dir):
                     self.direction = dir
                 else:
@@ -138,10 +177,12 @@ class userThread(threading.Thread):
                 Map.move(self.id, self.direction)
                 self.ready = True
 
+                print("Action computed!!")
+
             if isChange:
-                '''change code
-                interpretor.change(self.code)
-                '''
+                #change code interprete by inte
+                inte.addCommand(self.code)
+        
                 print("Code changed!!")
     
 
@@ -169,25 +210,28 @@ class UI(web.RequestHandler):
 class Socket(websocket.WebSocketHandler):
     id = -1
     def open(self):
+        print("haha")
         # save websocket if connection constructed
-        if(Map.user_count > 4):
+        if(Map.user_count >= 4):
             print("user number exceeded, connection closing...")
             self.close()
         
+        
         self.id = randint(0, 10000)
         thread = userThread(self.id)
-        Map.add_user(id, self, thread)
+        Map.add_user(self.id, self, thread)
         
         thread.start()
                 
-        d = {"map": Map.map, "position": [Map.users[self.id].position[0], Map.users[self.id].position[1]]}
+        d = {"myname": self.id, "map": Map.map, "position": [Map.users[self.id].position[0], Map.users[self.id].position[1]]}
         self.write_message(d)
-        print (str(self.id) + ' [x] connected.')
+        print(d["position"])
+        print (str(self.id) + ' [x] connected. User number: ' + str(Map.user_count))
     
     def on_close(self):
         # remove websocket of connection closed
         
-        Map.remove_user(id)
+        Map.remove_user(self.id)
         #To do: join thread
         
         print (str(self.id) + ' [x] disconnected.')
@@ -223,21 +267,34 @@ class Application(web.Application):
                     ]
         web.Application.__init__(self, handlers, **settings)
 
-############ game main thread ###############
+########## game main thread ##########
+# Maintain the integraty of the game #
+# flow. Call user thread and get the #
+# action of user. Send information   #
+# to client.                         #
+######################################
 def clock(delay):
-    count = 30
-    isPrepare = True
-    while True:
-        if(Map.user_count > 4):
-            continue
     
+    while Map.user_count < 4:
+        pass
+    
+    print("user preparing...")
+
+    count = 30
+    while count > 0:
+        print (count)
         time.sleep(delay)
         count -= 1
-        if(count > 0):
-            print (count)
-            continue
-        
-        
+    
+    userinit = []
+    for user in Map.id_list:
+        userinit.append([Map.users[user].position[0], Map.users[user].position[1]])
+
+    for user in Map.users:
+        Map.users[user].socket.write_message({'username': Map.id_list, 'userinit': userinit})
+
+    count = 120
+    while count > 0:
         action = {}
         #tell user thread to compute
         for user in Map.users:
@@ -255,14 +312,23 @@ def clock(delay):
             else:
                 message[user] = {'action': action[user], 'isOccupy': False}
 
+        #send user information
         for user in Map.users:
             Map.users[user].socket.write_message(message)
 
-#To do: game over, calculate score and exit
+        time.sleep(delay)
+
+    #To do: game over, calculate score and exit
+    score = Map.scoring()
+    for user in Map.users:
+        Map.users[user].socket.write_message({'score': score})
+
+    exitFlag = 1
+    for user in Map.users:
+        Map.users[user].thread.join()
 
 
-        
-#############################################
+######################################
 def main():
     Map.generate()
     options.parse_command_line()
