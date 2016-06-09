@@ -89,7 +89,7 @@ var conObj = {
 
 //class
 function playerObj(playerName,playerNum,x,y){
-    this.playerName = String(playerName);
+    this.playerName = playerName;
     this.playerNum = playerNum;
     this.x = 0;
     this.y = 0;
@@ -122,8 +122,8 @@ function createPlayer(username,userinit){
             var p = new playerObj(username[i],i,0,0);
             playerObjArr[i] = p;
             playerObjArr[i].elem.css("zIndex", 90-i);
-            moveMe(playerObjArr[i],0,userinit[i].y);
-            moveMe(playerObjArr[i],1,userinit[i].x);
+            moveMe(playerObjArr[i],0,userinit[i][0]);
+            moveMe(playerObjArr[i],1,userinit[i][1]);
             //moveMe(playerObjArr[i],0,15);
             //moveMe(playerObjArr[i],1,30);
 
