@@ -18,12 +18,37 @@ define("ip", default="your.ip")
 define("port", default=8888)
 
 
+#To do: map randomize, done
+#       bfs
+#       config, done
+#       code rejection, done
+#       other rule
+#       init on rock, done
+#       user left
+#       thread join done
+
+
+MAX_USER = 1
+GAME_TIME = 30
+CLOCK_DELAY = 0.5
+PREPARE_TIME = 5
+
+GRASS1_PROB = [0, 1, 2]
+GRASS2_PROB = [3, 4, 5]
+FLOWER_PROB = [6, 7, 8]
+ROCK_PROB = [9]
+RANDOM_SIZE = len(GRASS1_PROB) + len(GRASS2_PROB) + len(FLOWER_PROB) + len(ROCK_PROB) - 1
+
+isStart = False
+
+
 class User:
     def __init__(self, id, socket, thread, y, x):
         self.id = id
         self.socket = socket
         self.thread = thread
         self.position = [y, x]
+        self.online = True
 
 
 #manage user
@@ -37,7 +62,12 @@ class Map(object):
     
     @classmethod
     def add_user(cls, id, websocket, thread):
-        cls.users[id] = User(id, websocket, thread, randint(15, 29), randint(30, 59))
+        y = randint(15, 29)
+        x = randint(30, 59)
+        while cls.mymap[y][x] == 3:
+            y = randint(15, 29)
+            x = randint(30, 59)
+        cls.users[id] = User(id, websocket, thread, y, x)
         cls.belong[cls.users[id].position[0]][cls.users[id].position[1]] = id
         #cls.users[id] = {'socket': websocket, 'thread': thread, 'position': [randint(0, 44), randint(0, 89)]}
         #cls.belong[cls.users[id]['position'][0]][cls.users[id]['position'[1]]] = id
@@ -56,11 +86,26 @@ class Map(object):
 
     @classmethod
     def generate(cls):
+        print(GRASS1_PROB)
+        print(GRASS2_PROB)
+        print(FLOWER_PROB)
+        print(ROCK_PROB)
         for i in range(45):
             tmp = []
             tmp2 = []
+            
+
             for j in range(90):
-                tmp.append(randint(0, 3))
+                randnum = randint(0, RANDOM_SIZE)
+                if randnum in GRASS1_PROB:
+                    tmp.append(0)
+                elif randnum in GRASS2_PROB:
+                    tmp.append(1)
+                elif randnum in FLOWER_PROB:
+                    tmp.append(2)
+                elif randnum in ROCK_PROB:
+                    tmp.append(3)
+                
                 tmp2.append(-1)
             cls.mymap.append(tmp)
             cls.belong.append(tmp2)
@@ -106,12 +151,12 @@ class Map(object):
             return False
 
     @classmethod
-    def scoring():
+    def scoring(self):
         score = {}
-        for user in id_list:
+        for user in self.id_list:
             score[user] = 0
 
-        for row in belong:
+        for row in self.belong:
             for id in row:
                 if id == -1:
                     continue
@@ -131,7 +176,6 @@ class Map(object):
 
 #To do: connect with parser, done
 
-exitFlag = 0;
 
 class userThread(threading.Thread):
     def __init__(self, id):
@@ -141,11 +185,12 @@ class userThread(threading.Thread):
         self.code = ""
         self.direction = 'h'
         self.ready = True
+        self.exit = False
     
     def run(self):
         inte = interpreter.JJJInterpreter()
         cnt = 0
-        while not exitFlag:
+        while not self.exit:
             cnt += 1
             if(len(self.command) == 0):
                 continue
@@ -161,8 +206,11 @@ class userThread(threading.Thread):
                         
             if isChange:
                 #change code interprete by inte
-                inte.sendCommand(self.code)
-        
+                errorline = inte.sendCommand(self.code)
+                if(errorline >= 0):
+                    print("Invalid code: line " + str(errorline))
+                    Map.users[self.id].socket.write_message({'error': errorline})
+                    
                 #print("Code changed!! " + str(cnt))
 
             if isCompute:
@@ -220,10 +268,9 @@ class Socket(websocket.WebSocketHandler):
     def open(self):
         print("haha")
         # save websocket if connection constructed
-        if(Map.user_count >= 1):
+        if(Map.user_count >= MAX_USER):
             print("user number exceeded, connection closing...")
             self.close()
-        
         
         self.id = Map.user_count
         thread = userThread(self.id)
@@ -244,8 +291,15 @@ class Socket(websocket.WebSocketHandler):
     
     def on_close(self):
         # remove websocket of connection closed
-        
-        Map.remove_user(self.id)
+        global isStart
+        print(isStart)
+        if isStart:
+            Map.users[self.id].online = False
+        else:
+            print("user left during game")
+            Map.users[self.id].thread.exit = True
+            Map.users[self.id].thread.join()
+            Map.remove_user(self.id)
         #To do: join thread
         
         print (str(self.id) + ' [x] disconnected.')
@@ -289,17 +343,18 @@ class Application(web.Application):
 ######################################
 def clock(delay):
     
-    while Map.user_count < 1:
+    while Map.user_count < MAX_USER:
         pass
     
     print("user preparing...")
-
-    count = 5
-    short_command = "up\ndown\nleft\nright"
+    global isStart
+    isStart = True
+    print(isStart)
+    count = PREPARE_TIME
 
     while count > 0:
         print (count)
-        time.sleep(delay)
+        time.sleep(1)
         count -= 1
 
     print("game start!!")
@@ -308,11 +363,12 @@ def clock(delay):
         userinit.append([Map.users[user].position[0], Map.users[user].position[1]])
 
     for user in Map.users:
-        Map.users[user].socket.write_message({'username': Map.id_list})
-        Map.users[user].socket.write_message({'userinit': userinit})
-        Map.users[user].thread.changeCode(short_command)
+        if(Map.users[user].online):
+            Map.users[user].socket.write_message({'username': Map.id_list})
+            Map.users[user].socket.write_message({'userinit': userinit})
 
-    count = 120
+
+    count = GAME_TIME / delay
     while count > 0:
         action = {}
         #tell user thread to compute
@@ -323,11 +379,13 @@ def clock(delay):
         for user in Map.users:
             action[user] = Map.users[user].thread.getAction()
             print(str(user) + " " + action[user])
+            '''
             print(Map.users[user].position)
             print("up: " + str(Map.mymap[Map.users[user].position[0] - 1][Map.users[user].position[1]]))
             print("down: " + str(Map.mymap[Map.users[user].position[0] + 1][Map.users[user].position[1]]))
             print("left: " + str(Map.mymap[Map.users[user].position[0]][Map.users[user].position[1] - 1]))
             print("right: " + str(Map.mymap[Map.users[user].position[0]][Map.users[user].position[1] + 1]))
+            '''
 
         message = {}
         #check if occupy
@@ -339,27 +397,33 @@ def clock(delay):
 
         #send user information
         for user in Map.users:
-            Map.users[user].socket.write_message({'move': message})
+            if(Map.users[user].online):
+                Map.users[user].socket.write_message({'move': message})
 
         time.sleep(delay)
+        count -= 1
 
     #To do: game over, calculate score and exit
     score = Map.scoring()
+    print(score)
     for user in Map.users:
-        Map.users[user].socket.write_message({'score': score})
+        if(Map.users[user].online):
+            Map.users[user].socket.write_message({'score': score})
 
-    exitFlag = 1
+
     for user in Map.users:
+        Map.users[user].thread.exit = True
         Map.users[user].thread.join()
 
 
 ######################################
 def main():
+    global isStart
     Map.generate()
     options.parse_command_line()
     app = Application()
     app.listen(options.port)
-    _thread.start_new_thread(clock, (1, ))
+    _thread.start_new_thread(clock, (CLOCK_DELAY, ))
     ioloop.IOLoop.current().start()
 
 
