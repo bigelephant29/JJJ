@@ -60,17 +60,15 @@ class JJJInterpreter:
         self.REGISTER_NO = 4       # How many registers are available for a player
         
         # DON'T MODIFY
-        self.isLabeled = 0
-        self.isJumped = 0
         self.commandList = []
         self.register = {}
         self.registerMap = {}
+        self.labelDict = {}
         for i in range(1, self.REGISTER_NO + 1):
             key = '$' + str(i)
             value = chr( ord('A') + i - 1 )
             self.register[value] = 0
             self.registerMap[key] = value
-        self.buffQueue = queue.Queue()
         self.nowExecute = 0
 
         # Parser Configuration
@@ -102,6 +100,18 @@ class JJJInterpreter:
         assign = 7
         debug_print = 999
         
+    def initialize(self):
+        del self.commandList[:]
+        self.commandList = []
+        self.register.clear()
+        self.registerMap.clear()
+        for i in range(1, self.REGISTER_NO + 1):
+            key = '$' + str(i)
+            value = chr( ord('A') + i - 1 )
+            self.register[value] = 0
+            self.registerMap[key] = value
+        self.nowExecute = 0
+        
     # Function for transforming original command form into executable command form
     def commandTranslate(self, cmd):
         # Remove spaces in command
@@ -131,145 +141,74 @@ class JJJInterpreter:
             return 0
         
     # Function for looping between label-jump pair
-    def runCommand(self, stop = 1):
-        jumped = 0
-        if self.isLabeled == 0:
-            return
-        if len(self.commandList) == 0:
-            return
+    def getCommand(self):
         while 1:
             if self.nowExecute == len(self.commandList):
-                return
+                return None
             elif self.commandList[self.nowExecute][0] == self.CommandType.up:
-                self.buffQueue.put(self.CommandType.up)
                 self.nowExecute += 1
-                if stop == 1:
-                    return
+                return self.CommandType.up
             elif self.commandList[self.nowExecute][0] == self.CommandType.down:
-                self.buffQueue.put(self.CommandType.down)
                 self.nowExecute += 1
-                if stop == 1:
-                    return
+                return self.CommandType.down
             elif self.commandList[self.nowExecute][0] == self.CommandType.left:
-                self.buffQueue.put(self.CommandType.left)
                 self.nowExecute += 1
-                if stop == 1:
-                    return
+                return self.CommandType.left
             elif self.commandList[self.nowExecute][0] == self.CommandType.right:
-                self.buffQueue.put(self.CommandType.right)
                 self.nowExecute += 1
-                if stop == 1:
-                    return 
+                return self.CommandType.right
             elif self.commandList[self.nowExecute][0] == self.CommandType.jump:
-                if jumped == 1:
-                    return
-                self.nowExecute = 0
-                if stop == 0:
-                    return
-                jumped = 1
+                self.nowExecute = self.labelDict[self.commandList[self.nowExecute][1]]
             elif self.commandList[self.nowExecute][0] == self.CommandType.assign:
                 self.procAssignCmd(self.commandList[self.nowExecute][1], 1)
                 self.nowExecute += 1
-        
-    # Function for adding command to interpreter, return 1 on success, 0 on fail
-    def addCommand(self, cmd):
-        newCommand = cmd
-        if self.isJumped and cmd != 'label':
-            print ('[ERROR] You have to set a new label first')
-            return 0
-        # Try to find '=' in command
-        equalLocation = cmd.find('=')
-        # equalLocation == -1  means the command is not a assignment
-        if equalLocation == -1:
-            # Command Types
-            if cmd == 'up':
-                if self.isLabeled == 1:
-                    self.commandList.append((self.CommandType.up,));
-                else:
-                    self.buffQueue.put(self.CommandType.up)
-            elif cmd == 'down':
-                if self.isLabeled == 1:
-                    self.commandList.append((self.CommandType.down,));
-                else:
-                    self.buffQueue.put(self.CommandType.down)
-            elif cmd == 'left':
-                if self.isLabeled == 1:
-                    self.commandList.append((self.CommandType.left,));
-                else:
-                    self.buffQueue.put(self.CommandType.left)
-            elif cmd == 'right':
-                if self.isLabeled == 1:
-                    self.commandList.append((self.CommandType.right,));
-                else:
-                    self.buffQueue.put(self.CommandType.right)
-            elif cmd == 'jump':
-                if self.isLabeled == 1:
-                    self.isJumped = 1
-                    self.commandList.append((self.CommandType.jump,));
-                else:
-                    print ('[ERROR] No label for jumping')
-                    return 0
-            elif cmd == 'label':
-                # Set a label for jump
-                if ( len(self.commandList) > 0 ):
-                    self.runCommand(0)
-                    del self.commandList[:]
-                # Set labeled flag
-                self.isLabeled = 1
-                self.isJumped = 0
             else:
-                print ('[ERROR] Invalid Input: ', newCommand)
-                return 0
-        else:
-            # Assign/Operation Type
-            nowCommand = (self.CommandType.assign, cmd)
-            ret = self.procAssignCmd(cmd)
-            if ret == 1:
-                if self.isLabeled == 1:
-                    self.commandList.append(nowCommand)
-                else:
-                    self.procAssignCmd(cmd, 1)
-            else:
-                print ('[ERROR] Invalid Input: ', newCommand)
-                return 0
-        return 1
+                self.nowExecute += 1
         
     # Function for checking the validation of multiline input    
     def sendCommand(self, cmd):
-        tmpisJumped = self.isJumped
-        tmpisLabeled = self.isLabeled
         newCommand = cmd.split('\n')
+        newCommandList = []
+        newLabelDict = {}
         for i in range(0, len(newCommand)):
             # Translate command first
-            saveCommand = newCommand[i]
+            saveCommand = newCommand[i] #save command for 
             newCommand[i] = self.commandTranslate(newCommand[i])
             if len(newCommand[i]) == 0:
                 continue
-            if tmpisJumped and newCommand[i] != 'label':
-                print ('[ERROR] You have to set a new label first')
-                return i
             # Try to find '=' in command
             equalLocation = newCommand[i].find('=')
             # equalLocation == -1  means the command is not a assignment
             if equalLocation == -1:
                 # Command Types
                 if newCommand[i] == 'up':
-                    pass
+                    newCommandList.append((self.CommandType.up,));
                 elif newCommand[i] == 'down':
-                    pass
+                    newCommandList.append((self.CommandType.down,));
                 elif newCommand[i] == 'left':
-                    pass
+                    newCommandList.append((self.CommandType.left,));
                 elif newCommand[i] == 'right':
-                    pass
-                elif newCommand[i] == 'jump':
-                    if  tmpisLabeled == 1:
-                        tmpisJumped = 1
-                    else:
-                        print ('[ERROR] No label for jumping')
+                    newCommandList.append((self.CommandType.right,));
+                elif newCommand[i].startswith('jump'):
+                    sub = newCommand[i][4:]
+                    try:
+                        sub = int(sub)
+                    except:
+                        print ('[ERROR] not an integer label')
                         return i
-                elif newCommand[i] == 'label':
-                    tmpisLabeled = 1
-                    tmpisJumped = 0
+                    if sub not in newLabelDict:
+                        print ('[ERROR] not an existing label')
+                        return i
+                    newCommandList.append((self.CommandType.jump,sub));
+                elif newCommand[i].startswith('label'):
+                    sub = newCommand[i][5:]
+                    try:
+                        sub = int(sub)
+                    except:
+                        print ('[ERROR] not an integer label')
+                        return i
+                    newLabelDict[sub] = i
+                    newCommandList.append((self.CommandType.label,sub));
                 else:
                     print ('[ERROR] Invalid Input: ', saveCommand)
                     return i
@@ -277,26 +216,16 @@ class JJJInterpreter:
                 # Assign/Operation Type
                 ret = self.procAssignCmd(newCommand[i])
                 if ret == 1:
-                    pass
+                    newCommandList.append((self.CommandType.assign,newCommand[i]))
                 else:
                     print ('[ERROR] Invalid Input: ', saveCommand)
                     return i
-        for line in newCommand:
-            self.addCommand(line)
+        self.initialize()
+        del self.commandList[:]
+        self.commandList = newCommandList
+        self.labelDict = newLabelDict
         return -1
         
-    # Function for getting a command from buffer
-    def getCommand(self):
-        if self.buffQueue.empty():
-            self.runCommand()
-            if self.buffQueue.empty():
-                print ('[ERROR] No command for executing')
-                return None
-            else:
-                return self.buffQueue.get()
-        else:
-            return self.buffQueue.get()
-           
     # Function for debugging, just ignore it :)
     def printReg(self):
         for key, value in self.register.items():
