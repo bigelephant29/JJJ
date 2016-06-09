@@ -170,6 +170,7 @@ class JJJInterpreter:
         newCommand = cmd.split('\n')
         newCommandList = []
         newLabelDict = {}
+        jumpTarget = []
         for i in range(0, len(newCommand)):
             # Translate command first
             saveCommand = newCommand[i] #save command for 
@@ -196,9 +197,7 @@ class JJJInterpreter:
                     except:
                         print ('[ERROR] not an integer label')
                         return i
-                    if sub not in newLabelDict:
-                        print ('[ERROR] not an existing label')
-                        return i
+                    jumpTarget.append((i, sub))
                     newCommandList.append((self.CommandType.jump,sub));
                 elif newCommand[i].startswith('label'):
                     sub = newCommand[i][5:]
@@ -206,6 +205,9 @@ class JJJInterpreter:
                         sub = int(sub)
                     except:
                         print ('[ERROR] not an integer label')
+                        return i
+                    if sub in newLabelDict:
+                        print ('[ERROR] use the same label twice')
                         return i
                     newLabelDict[sub] = i
                     newCommandList.append((self.CommandType.label,sub));
@@ -220,6 +222,10 @@ class JJJInterpreter:
                 else:
                     print ('[ERROR] Invalid Input: ', saveCommand)
                     return i
+        for i, target in jumpTarget:
+            if target not in newLabelDict:
+                print ('[ERROR] not an existing label')
+                return i
         self.initialize()
         del self.commandList[:]
         self.commandList = newCommandList
