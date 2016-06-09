@@ -327,7 +327,9 @@ $(document).ready(function() {
         conObj.sendMsg($("textarea:first").val());
         event.preventDefault();
     });
-    conObj.init()
+    conObj.init();
+    
+    $(".linedtext").linedtextarea();
     
     /*myname = 0;
     username.push("Me");
