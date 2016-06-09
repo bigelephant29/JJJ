@@ -232,7 +232,7 @@ function movePlayers(move){
 }
 function moveMe(me,left,mv){
     if(left==1){
-        if(me.x+mv > 0 && me.x+mv < 89){
+        if(me.x+mv >= 0 && me.x+mv < 90){
             me.elem.animate({left:"+="+mv*32+"px"},'fast');
             if(mv>0){
                 if((me.x % 30) == 29){
@@ -249,7 +249,7 @@ function moveMe(me,left,mv){
         }
     }
     else{
-        if(me.y+mv > 0 && me.y+mv < 44){
+        if(me.y+mv >= 0 && me.y+mv < 45){
             me.elem.animate({top:"+="+mv*32+"px"},'fast');
             if(mv>0){
                 if((me.y % 15) == 14){
