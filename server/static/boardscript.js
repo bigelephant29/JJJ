@@ -89,7 +89,7 @@ var conObj = {
 
 //class
 function playerObj(playerName,playerNum,x,y){
-    this.playerName = String(playerName);
+    this.playerName = playerName;
     this.playerNum = playerNum;
     this.x = 0;
     this.y = 0;
