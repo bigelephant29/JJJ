@@ -105,6 +105,7 @@ class JJJInterpreter:
         self.commandList = []
         self.register.clear()
         self.registerMap.clear()
+        self.labelDict.clear()
         for i in range(1, self.REGISTER_NO + 1):
             key = '$' + str(i)
             value = chr( ord('A') + i - 1 )
