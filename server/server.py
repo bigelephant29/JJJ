@@ -29,7 +29,7 @@ define("port", default=8888)
 
 
 MAX_USER = 1
-GAME_TIME = 30
+GAME_TIME = 300
 CLOCK_DELAY = 0.5
 PREPARE_TIME = 5
 
@@ -219,15 +219,24 @@ class userThread(threading.Thread):
         
                 if dir == inte.CommandType.up:
                     dir = 'u'
-                if dir == inte.CommandType.down:
+                elif dir == inte.CommandType.down:
                     dir = 'd'
-                if dir == inte.CommandType.left:
+                elif dir == inte.CommandType.left:
                     dir = 'l'
-                if dir == inte.CommandType.right:
+                elif dir == inte.CommandType.right:
                     dir = 'r'
-                if dir == None:
-                    dir = 'h'
+                elif dir == None:
+                    self.ready = True
+                    return
+                    #dir = 'h'
                 
+                self.direction = dir
+                if Map.checkMoveIntegraty(self.id, dir):
+                    Map.move(self.id, self.direction)
+                    
+                
+                self.ready = True
+                '''
                 if Map.checkMoveIntegraty(self.id, dir):
                     self.direction = dir
                 else:
@@ -235,7 +244,7 @@ class userThread(threading.Thread):
                 
                 Map.move(self.id, self.direction)
                 self.ready = True
-
+                '''
                 #print("Action computed!! " + str(cnt))
 
                
@@ -246,8 +255,8 @@ class userThread(threading.Thread):
         print("compute")
 
     def getAction(self):
-        while not self.ready:
-            pass
+        if not self.ready:
+            return None
         return self.direction
 
     def changeCode(self, code):
@@ -368,18 +377,33 @@ def clock(delay):
             Map.users[user].socket.write_message({'userinit': userinit})
 
 
-    count = GAME_TIME / delay
-    while count > 0:
+    count = 0
+
+    t0 = time.time()
+    while count < GAME_TIME:
+        count += delay
         action = {}
         #tell user thread to compute
         for user in Map.users:
             Map.users[user].thread.computeAction()
 
         #get computed action
+
+        ids = Map.id_list[:]
+        print(ids)
+
+        print(str(count - (time.time() - t0)))
+        while len(ids) != 0 and time.time() - t0 < count:
+            id = ids.pop(0)
+            action[id] = Map.users[id].thread.getAction()
+            if action[user] == None:
+                ids.append(id)
+
+        '''
         for user in Map.users:
             action[user] = Map.users[user].thread.getAction()
             print(str(user) + " " + action[user])
-            '''
+            
             print(Map.users[user].position)
             print("up: " + str(Map.mymap[Map.users[user].position[0] - 1][Map.users[user].position[1]]))
             print("down: " + str(Map.mymap[Map.users[user].position[0] + 1][Map.users[user].position[1]]))
@@ -389,19 +413,26 @@ def clock(delay):
 
         message = {}
         #check if occupy
+        #print(action)
         for user in Map.users:
+            if(action[user] == None):
+                action[user] = 'h'
             if(Map.belong[Map.users[user].position[0]][Map.users[user].position[1]] == user):
-                message[user] = {'action': action[user], 'isOccupy': True}
+                message[user] = {'position': Map.users[user].position[:],'direction': action[user], 'isOccupy': True}
             else:
-                message[user] = {'action': action[user], 'isOccupy': False}
+                message[user] = {'position': Map.users[user].position[:],'direction': action[user], 'isOccupy': False}
 
         #send user information
         for user in Map.users:
             if(Map.users[user].online):
                 Map.users[user].socket.write_message({'move': message})
-
-        time.sleep(delay)
-        count -= 1
+        print(str(time.time() - t0))
+        remain = count - (time.time() - t0)
+        if(remain > 0):
+            time.sleep(remain)
+            #count -= 1
+        print(str(time.time() - t0))
+        print("======================")
 
     #To do: game over, calculate score and exit
     score = Map.scoring()
