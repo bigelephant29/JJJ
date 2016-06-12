@@ -51,6 +51,29 @@ class EvalAddOp(object):
                 sum -= val.eval()
         return sum
 
+class EvalComparisonOp(object):
+    opMap = {
+        "<" : lambda a,b : a < b,
+        "<=" : lambda a,b : a <= b,
+        ">" : lambda a,b : a > b,
+        ">=" : lambda a,b : a >= b,
+        "!=" : lambda a,b : a != b,
+        "==" : lambda a,b : a == b,
+        }
+    def __init__(self, tokens):
+        self.value = tokens[0]
+    def eval(self):
+        val1 = self.value[0].eval()
+        for op,val in operatorOperands(self.value[1:]):
+            fn = EvalComparisonOp.opMap[op]
+            val2 = val.eval()
+            if not fn(val1,val2):
+                break
+            val1 = val2
+        else:
+            return True
+        return False
+
 class JJJInterpreter:
      
     def __init__(self, buff_size = 3):
@@ -88,6 +111,12 @@ class JJJInterpreter:
              (self.plusop, 2, opAssoc.LEFT, EvalAddOp),
             ])
         
+        self.comparisonop = oneOf("< <= > >= != ==")
+        self.comp_expr = operatorPrecedence(self.arith_expr,
+        [
+        (self.comparisonop, 2, opAssoc.LEFT, EvalComparisonOp),
+        ])
+        
     # Enum Class for command types
     class CommandType(Enum):
         noType = 0
@@ -96,8 +125,9 @@ class JJJInterpreter:
         left = 3
         right = 4
         jump = 5
-        label = 6
-        assign = 7
+        condition = 6
+        label = 7
+        assign = 8
         debug_print = 999
         
     def initialize(self):
@@ -123,6 +153,12 @@ class JJJInterpreter:
             cmd = cmd.replace(key, value)
         return cmd
     
+    # Function for evaluating an expression
+    def exprEval(self, expr):
+        EvalConstant.variables = self.register
+        ret = self.comp_expr.parseString(expr)[0].eval()
+        return ret
+
     # Function for processing assign statement, assign value to register when assign = 1
     def procAssignCmd(self, cmd, assign = 0):
         cmd = cmd.split('=')
@@ -134,18 +170,25 @@ class JJJInterpreter:
         try:
             if assign == 1:
                 EvalConstant.variables = self.register
-                self.register[cmd[0]] = self.arith_expr.parseString(cmd[1])[0].eval()
+                self.register[cmd[0]] = self.exprEval(cmd[1])
             else:
                 EvalConstant.variables = self.register
-                self.arith_expr.parseString(cmd[1])[0].eval()
+                self.exprEval(cmd[1])
             return 1
         except:
             return 0
         
+    def procCompCmd(self, cmd):
+        try:
+            ret = self.exprEval(cmd)
+            return ret
+        except:
+            return None
+        
     # Function for looping between label-jump pair
     def getCommand(self):
         while 1:
-            if self.nowExecute == len(self.commandList):
+            if self.nowExecute >= len(self.commandList):
                 return None
             elif self.commandList[self.nowExecute][0] == self.CommandType.up:
                 self.nowExecute += 1
@@ -159,6 +202,16 @@ class JJJInterpreter:
             elif self.commandList[self.nowExecute][0] == self.CommandType.right:
                 self.nowExecute += 1
                 return self.CommandType.right
+            elif self.commandList[self.nowExecute][0] == self.CommandType.condition:
+                ret = self.procCompCmd(self.commandList[self.nowExecute][1])
+                if ret != 0:
+                    self.nowExecute += 1
+                else:
+                    self.nowExecute += 1
+                    while self.nowExecute < len(self.commandList) and \
+                          self.commandList[self.nowExecute][0] == self.CommandType.condition:
+                        self.nowExecute += 1
+                    self.nowExecute += 1
             elif self.commandList[self.nowExecute][0] == self.CommandType.jump:
                 self.nowExecute = self.labelDict[self.commandList[self.nowExecute][1]]
             elif self.commandList[self.nowExecute][0] == self.CommandType.assign:
@@ -192,6 +245,14 @@ class JJJInterpreter:
                     newCommandList.append((self.CommandType.left,));
                 elif newCommand[i] == 'right':
                     newCommandList.append((self.CommandType.right,));
+                elif newCommand[i].startswith('if'):
+                    sub = newCommand[i][2:]
+                    ret = self.procCompCmd(sub)
+                    if ret != None:
+                        newCommandList.append((self.CommandType.condition, newCommand[i][2:]));
+                    else:
+                        print ('[ERROR] Invalid Input: ', saveCommand)
+                        return i
                 elif newCommand[i].startswith('jump'):
                     sub = newCommand[i][4:]
                     try:
@@ -241,7 +302,7 @@ class JJJInterpreter:
         
 def main():
     inte = JJJInterpreter()
-    inte.sendCommand('up\ndown\nleft\nright\nfuck')
+    inte.sendCommand('if 2\n$1=2')
     while True:
         inputString = input()
         if inputString == 'print':
