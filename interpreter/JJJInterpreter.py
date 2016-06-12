@@ -117,6 +117,7 @@ class JJJInterpreter:
     def commandTranslate(self, cmd):
         # Remove spaces in command
         cmd = cmd.replace(' ', '')
+        cmd = cmd.replace('\t', '')
         # Replace the register name with its variable name in interpreter
         for key, value in self.registerMap.items():
             cmd = cmd.replace(key, value)
