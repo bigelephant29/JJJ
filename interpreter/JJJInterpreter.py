@@ -162,6 +162,8 @@ class JJJInterpreter:
     # Function for processing assign statement, assign value to register when assign = 1
     def procAssignCmd(self, cmd, assign = 0):
         cmd = cmd.split('=')
+        if len(cmd) > 2:
+            return 0
         # Parse left expression
         if len(cmd[0]) > 1 or len(cmd[0]) == 0:
             return 0
@@ -232,51 +234,44 @@ class JJJInterpreter:
             newCommand[i] = self.commandTranslate(newCommand[i])
             if len(newCommand[i]) == 0:
                 continue
-            # Try to find '=' in command
-            equalLocation = newCommand[i].find('=')
-            # equalLocation == -1  means the command is not a assignment
-            if equalLocation == -1:
-                # Command Types
-                if newCommand[i] == 'up':
-                    newCommandList.append((self.CommandType.up,));
-                elif newCommand[i] == 'down':
-                    newCommandList.append((self.CommandType.down,));
-                elif newCommand[i] == 'left':
-                    newCommandList.append((self.CommandType.left,));
-                elif newCommand[i] == 'right':
-                    newCommandList.append((self.CommandType.right,));
-                elif newCommand[i].startswith('if'):
-                    sub = newCommand[i][2:]
-                    ret = self.procCompCmd(sub)
-                    if ret != None:
-                        newCommandList.append((self.CommandType.condition, newCommand[i][2:]));
-                    else:
-                        print ('[ERROR] Invalid Input: ', saveCommand)
-                        return i
-                elif newCommand[i].startswith('jump'):
-                    sub = newCommand[i][4:]
-                    try:
-                        sub = int(sub)
-                    except:
-                        print ('[ERROR] not an integer label')
-                        return i
-                    jumpTarget.append((i, sub))
-                    newCommandList.append((self.CommandType.jump,sub));
-                elif newCommand[i].startswith('label'):
-                    sub = newCommand[i][5:]
-                    try:
-                        sub = int(sub)
-                    except:
-                        print ('[ERROR] not an integer label')
-                        return i
-                    if sub in newLabelDict:
-                        print ('[ERROR] use the same label twice')
-                        return i
-                    newLabelDict[sub] = i
-                    newCommandList.append((self.CommandType.label,sub));
+            # Command Types
+            if newCommand[i] == 'up':
+                newCommandList.append((self.CommandType.up,));
+            elif newCommand[i] == 'down':
+                newCommandList.append((self.CommandType.down,));
+            elif newCommand[i] == 'left':
+                newCommandList.append((self.CommandType.left,));
+            elif newCommand[i] == 'right':
+                newCommandList.append((self.CommandType.right,));
+            elif newCommand[i].startswith('if'):
+                sub = newCommand[i][2:]
+                ret = self.procCompCmd(sub)
+                if ret != None:
+                    newCommandList.append((self.CommandType.condition, newCommand[i][2:]));
                 else:
                     print ('[ERROR] Invalid Input: ', saveCommand)
                     return i
+            elif newCommand[i].startswith('jump'):
+                sub = newCommand[i][4:]
+                try:
+                    sub = int(sub)
+                except:
+                    print ('[ERROR] not an integer label')
+                    return i
+                jumpTarget.append((i, sub))
+                newCommandList.append((self.CommandType.jump,sub));
+            elif newCommand[i].startswith('label'):
+                sub = newCommand[i][5:]
+                try:
+                    sub = int(sub)
+                except:
+                    print ('[ERROR] not an integer label')
+                    return i
+                if sub in newLabelDict:
+                    print ('[ERROR] use the same label twice')
+                    return i
+                newLabelDict[sub] = i
+                newCommandList.append((self.CommandType.label,sub));
             else:
                 # Assign/Operation Type
                 ret = self.procAssignCmd(newCommand[i])
