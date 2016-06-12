@@ -55,7 +55,119 @@ title{
 
 }
 
-img{
+/*img{
 	width:32px;
 	height:32px;
+}*/
+
+.right {
+	-webkit-animation: rightframe .9s steps(5) infinite;
+	-moz-animation: rightframe .9s steps(5) infinite;
+	-ms-animation: rightframe .9s steps(5) infinite;
+	-o-animation: rightframe .9s steps(5) infinite;
+	animation: rightframe .9s steps(5) infinite;
+}
+@-webkit-keyframes rightframe {
+	from { background-position: 0% 0%; }
+	to { background-position: -500% 0%; }
+}
+@-moz-keyframes rightframe {
+	from { background-position: 0% 0%; }
+	to { background-position: -500% 0%; }
+}
+@-ms-keyframes rightframe {
+	from { background-position: 0% 0%; }
+	to { background-position: -500% 0%; }
+}
+@-o-keyframes rightframe {
+	from { background-position: 0% 0%; }
+	to { background-position: -500% 0%; }
+}
+@-keyframes rightframe {
+	from { background-position: 0% 0%; }
+	to { background-position: -500% 0%; }
+}
+
+.left {
+	-webkit-animation: leftframe .9s steps(5) infinite;
+	-moz-animation: leftframe .9s steps(5) infinite;
+	-ms-animation: leftframe .9s steps(5) infinite;
+	-o-animation: leftframe .9s steps(5) infinite;
+	animation: leftframe .9s steps(5) infinite;
+}
+@-webkit-keyframes leftframe {
+	from { background-position: 0% -100%; }
+	to { background-position: -500% -100%; }
+}
+@-moz-keyframes leftframe {
+	from { background-position: 0% -100%; }
+	to { background-position: -500% -100%; }
+}
+@-ms-keyframes leftframe {
+	from { background-position: 0% -100%; }
+	to { background-position: -500% -100%; }
+}
+@-o-keyframes leftframe {
+	from { background-position: 0% -100%; }
+	to { background-position: -500% -100%; }
+}
+@-keyframes leftframe {
+	from { background-position: 0% -100%; }
+	to { background-position: -500% -100%; }
+}
+
+.up {
+	-webkit-animation: upframe .9s steps(5) infinite;
+	-moz-animation: upframe .9s steps(5) infinite;
+	-ms-animation: upframe .9s steps(5) infinite;
+	-o-animation: upframe .9s steps(5) infinite;
+	animation: upframe .9s steps(5) infinite;
+}
+@-webkit-keyframes upframe {
+	from { background-position: 0% -200%; }
+	to { background-position: -500% -200%; }
+}
+@-moz-keyframes upframe {
+	from { background-position: 0% -200%; }
+	to { background-position: -500% -200%; }
+}
+@-ms-keyframes upframe {
+	from { background-position: 0% -200%; }
+	to { background-position: -500% -200%; }
+}
+@-o-keyframes upframe {
+	from { background-position: 0% -200%; }
+	to { background-position: -500% -200%; }
+}
+@-keyframes upframe {
+	from { background-position: 0% -200%; }
+	to { background-position: -500% -200%; }
+}
+
+.down {
+	-webkit-animation: downframe .9s steps(5) infinite;
+	-moz-animation: downframe .9s steps(5) infinite;
+	-ms-animation: downframe .9s steps(5) infinite;
+	-o-animation: downframe .9s steps(5) infinite;
+	animation: downframe .9s steps(5) infinite;
+}
+@-webkit-keyframes downframe {
+	from { background-position: 0% -300%; }
+	to { background-position: -500% -300%; }
+}
+@-moz-keyframes downframe {
+	from { background-position: 0% -300%; }
+	to { background-position: -500% -300%; }
+}
+@-ms-keyframes downframe {
+	from { background-position: 0% -300%; }
+	to { background-position: -500% -300%; }
+}
+@-o-keyframes downframe {
+	from { background-position: 0% -300%; }
+	to { background-position: -500% -300%; }
+}
+@-keyframes downframe {
+	from { background-position: 0% -300%; }
+	to { background-position: -500% -300%; }
 }
