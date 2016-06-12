@@ -324,12 +324,19 @@ $(document).ready(function() {
     board_position = Create2DArray(45);
     
     $( "form" ).submit(function( event ) {
-        conObj.sendMsg($("textarea:first").val());
+        conObj.sendMsg($("#code").val());
         event.preventDefault();
     });
     conObj.init();
     
     $(".linedtext").linedtextarea();
+    $("#code").keydown(function (e) {
+        if (e.ctrlKey && e.keyCode == 13) {
+            // Ctrl-Enter pressed
+            conObj.sendMsg($("#code").val());
+            e.preventDefault();
+        }
+    });
     
     /*myname = 0;
     username.push("Me");
