@@ -1,6 +1,7 @@
 from enum import Enum
 import queue
 from pyparsing import Word, nums, alphas, Combine, oneOf, opAssoc, operatorPrecedence
+import time
 
 def operatorOperands(tokenlist):
     it = iter(tokenlist)
@@ -189,6 +190,7 @@ class JJJInterpreter:
         
     # Function for looping between label-jump pair
     def getCommand(self):
+        nowTime = time.time()
         while 1:
             if self.nowExecute >= len(self.commandList):
                 return None
@@ -221,6 +223,9 @@ class JJJInterpreter:
                 self.nowExecute += 1
             else:
                 self.nowExecute += 1
+            if time.time() - nowTime > 1:
+                print ('Time Exceed')
+                return None
         
     # Function for checking the validation of multiline input    
     def sendCommand(self, cmd):
