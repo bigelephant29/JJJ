@@ -122,8 +122,8 @@ function createPlayer(username,userinit){
             var p = new playerObj(username[i],i,0,0);
             playerObjArr[i] = p;
             playerObjArr[i].elem.css("zIndex", 90-i);
-            moveMe(playerObjArr[i],0,userinit[i].y);
-            moveMe(playerObjArr[i],1,userinit[i].x);
+            moveMe(playerObjArr[i],0,userinit[i][0]);
+            moveMe(playerObjArr[i],1,userinit[i][1]);
             //moveMe(playerObjArr[i],0,15);
             //moveMe(playerObjArr[i],1,30);
 
@@ -232,38 +232,34 @@ function movePlayers(move){
 }
 function moveMe(me,left,mv){
     if(left==1){
-        if(me.x+mv > 0 && me.x+mv < 89){
-            me.elem.animate({left:"+="+mv*32+"px"},'fast');
-            if(mv>0){
-                if((me.x % 30) == 29){
-                    moveBoard(BoardObj,1,-30);
-                }
+        me.elem.animate({left:"+="+mv*32+"px"},'fast');
+        if(mv>0){
+            if((me.x % 30) == 29){
+                moveBoard(BoardObj,1,-30);
             }
-            else{
-                if((me.x % 30) == 0){
-                    moveBoard(BoardObj,1,30);
-                }
-            }
-            me.x+=mv;
-            //alert("me.x:"+me.x);
         }
+        else{
+            if((me.x % 30) == 0){
+                moveBoard(BoardObj,1,30);
+            }
+        }
+        me.x+=mv;
+        //alert("me.x:"+me.x);
     }
     else{
-        if(me.y+mv > 0 && me.y+mv < 44){
-            me.elem.animate({top:"+="+mv*32+"px"},'fast');
-            if(mv>0){
-                if((me.y % 15) == 14){
-                    moveBoard(BoardObj,0,-15);
-                }
+        me.elem.animate({top:"+="+mv*32+"px"},'fast');
+        if(mv>0){
+            if((me.y % 15) == 14){
+                moveBoard(BoardObj,0,-15);
             }
-            else{
-                if((me.y % 15) == 0){
-                    moveBoard(BoardObj,0,15);
-                }
-            }
-            me.y+=mv;
-            //alert("me.y:"+me.y);
         }
+        else{
+            if((me.y % 15) == 0){
+                moveBoard(BoardObj,0,15);
+            }
+        }
+        me.y+=mv;
+        //alert("me.y:"+me.y);
     }
 }
 
@@ -328,10 +324,19 @@ $(document).ready(function() {
     board_position = Create2DArray(45);
     
     $( "form" ).submit(function( event ) {
-        conObj.sendMsg($("textarea:first").val());
+        conObj.sendMsg($("#code").val());
         event.preventDefault();
     });
-    conObj.init()
+    conObj.init();
+    
+    $(".linedtext").linedtextarea();
+    $("#code").keydown(function (e) {
+        if (e.ctrlKey && e.keyCode == 13) {
+            // Ctrl-Enter pressed
+            conObj.sendMsg($("#code").val());
+            e.preventDefault();
+        }
+    });
     
     /*myname = 0;
     username.push("Me");
