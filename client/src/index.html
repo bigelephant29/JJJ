@@ -2,16 +2,14 @@
 <html>
     <head>
     	<title>JJJ</title>
-        <link rel='stylesheet' type='text/css' href='./stylesheet.css'/>
-        <script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.0/jquery.min.js"></script>
-        <script type="text/javascript" src="/static/json2.js"></script>
-        <script src="./boardscript.js"></script>
+        <link rel="stylesheet" type="text/css" href="stylesheet.css"/>
+        <link rel="stylesheet" type="text/css" href="linedtextarea.css"/>
+        <script src="http://ajax.googleapis.com/ajax/libs/jquery/2.0.0/jquery.min.js"></script>
+        <script type="text/javascript" src="json2.js"></script>
+        <script type="text/javascript" src="linedtextarea.js"></script>
+        <script type="text/javascript" src="boardscript.js"></script>
     </head>
 	<body>
-        <div class="Main">
-            <div class="Title"><h1>JJJ</h1></div>
-            <div class="Message"><input id="message" type="text" value=""/></div>
-        </div>
         <div class="Window">
         	<div class="Board" id="board">
                 <div class="Cell"><img src="./png/Grass0.png"></div>
@@ -20,6 +18,16 @@
                 <div class="Cell"><img src="./png/Rock.png"></div>
                 <div class="Player" id="me"><img src="./png/vader.png"></div>
             </div>
+        </div>
+        <div class="Main">
+            <!-- <div class="Message"><input id="message" type="text" value=""/></div> -->
+            <form>
+                <div>
+                    <textarea id="code" class="linedtext"></textarea>
+                        <br />
+                    <!-- <input type="submit"/> -->
+                </div>
+            </form>
         </div>
 	</body>
 </html>
