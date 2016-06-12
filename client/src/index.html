@@ -2,15 +2,24 @@
 <html>
     <head>
     	<title>JJJ</title>
-        <link rel='stylesheet' type='text/css' href='./stylesheet.css'/>
-        <script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.0/jquery.min.js"></script>
-        <script type="text/javascript" src="/static/json2.js"></script>
-        <script src="./boardscript.js"></script>
+        <link rel="stylesheet" type="text/css" href="stylesheet.css"/>
+        <link rel="stylesheet" type="text/css" href="linedtextarea.css"/>
+        <script src="http://ajax.googleapis.com/ajax/libs/jquery/2.0.0/jquery.min.js"></script>
+        <script src="linedtextarea.js"></script>
+        <script type="text/javascript" src="json2.js"></script>
+        <script src="boardscript.js"></script>
     </head>
 	<body>
         <div class="Main">
             <div class="Title"><h1>JJJ</h1></div>
-            <div class="Message"><input id="message" type="text" value=""/></div>
+            <!-- <div class="Message"><input id="message" type="text" value=""/></div> -->
+            <form>
+                <div>
+                    <textarea class="linedtext" cols="80" rows="5"></textarea>
+                        <br />
+                    <input type="submit"/>
+                </div>
+            </form>
         </div>
         <div class="Window">
         	<div class="Board" id="board">

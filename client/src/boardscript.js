@@ -305,6 +305,7 @@ $(document).ready(function() {
     username.push("Trooper");
     username.push("Ewok");
     createPlayer(username);
+    $(".linedtext").linedtextarea();
     
     //playerKeyDown(playerObjArr[myname],BoardObj,connectObj);
     moveMe(playerObjArr[1],1,15);
