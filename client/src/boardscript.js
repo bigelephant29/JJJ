@@ -358,7 +358,15 @@ $(document).ready(function() {
     username.push("Ewok");
     createPlayer(username);
     
-    //playerKeyDown(playerObjArr[myname],BoardObj,conObj);
+    $(".linedtext").linedtextarea();
+    $("#code").keydown(function (e) {
+        if (e.ctrlKey && e.keyCode == 13) {
+            // Ctrl-Enter pressed
+            alert("submit code");
+        }
+    });
+    
+    //playerKeyDown(playerObjArr[myname],BoardObj,connectObj);
     moveMe(playerObjArr[1],1,15);
     moveMe(playerObjArr[2],0,7);
     moveMe(playerObjArr[3],1,15);

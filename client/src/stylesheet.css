@@ -1,3 +1,9 @@
+
+textarea{
+    width: 960px;
+    height: 105px;
+}
+
 head {
 	background-color: #000000;
 }
@@ -16,11 +22,7 @@ title{
 	border-style: outset;
     border-width: 5px;
     border-color:#4e2d05;
-    position:absolute;
-	left:50%;
-	top:60%;
-	margin-left:-480px;
-	margin-top: -240px;
+	margin: auto;
 	overflow: hidden;
 }
 
