@@ -305,7 +305,14 @@ $(document).ready(function() {
     username.push("Trooper");
     username.push("Ewok");
     createPlayer(username);
+    
     $(".linedtext").linedtextarea();
+    $("#code").keydown(function (e) {
+        if (e.ctrlKey && e.keyCode == 13) {
+            // Ctrl-Enter pressed
+            alert("submit code");
+        }
+    });
     
     //playerKeyDown(playerObjArr[myname],BoardObj,connectObj);
     moveMe(playerObjArr[1],1,15);
