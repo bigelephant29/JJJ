@@ -423,6 +423,7 @@ def clock(delay):
                 message[user] = {'position': Map.users[user].position[:],'direction': action[user], 'isOccupy': False}
 
         #send user information
+        print message[]
         for user in Map.users:
             if(Map.users[user].online):
                 Map.users[user].socket.write_message({'move': message})
