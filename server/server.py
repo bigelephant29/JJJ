@@ -28,7 +28,7 @@ define("port", default=8888)
 #       thread join done
 
 
-MAX_USER = 1
+MAX_USER = 2
 GAME_TIME = 300
 CLOCK_DELAY = 0.5
 PREPARE_TIME = 5
@@ -192,6 +192,7 @@ class userThread(threading.Thread):
         cnt = 0
         while not self.exit:
             cnt += 1
+            #print(cnt)
             if(len(self.command) == 0):
                 continue
 
@@ -201,6 +202,7 @@ class userThread(threading.Thread):
                 cmd = self.command.pop()
                 if(cmd == "compute"):
                     isCompute = True
+                    #print("hahahas")
                 elif(cmd == "change"):
                     isChange = True
                         
@@ -212,29 +214,33 @@ class userThread(threading.Thread):
                     Map.users[self.id].socket.write_message({'error': errorline})
                     
                 #print("Code changed!! " + str(cnt))
+            
 
             if isCompute:
                 #compute user movement
+                #print("before")
                 dir = inte.getCommand()
-        
+                #print("after")
                 if dir == inte.CommandType.up:
                     dir = 'u'
-                elif dir == inte.CommandType.down:
+                if dir == inte.CommandType.down:
                     dir = 'd'
-                elif dir == inte.CommandType.left:
+                if dir == inte.CommandType.left:
                     dir = 'l'
-                elif dir == inte.CommandType.right:
+                if dir == inte.CommandType.right:
                     dir = 'r'
-                elif dir == None:
+                if dir == None:
+                    #print("hehe")
                     self.ready = True
-                    return
+                    continue
                     #dir = 'h'
                 
+                #print("hahaha")
                 self.direction = dir
                 if Map.checkMoveIntegraty(self.id, dir):
                     Map.move(self.id, self.direction)
                     
-                
+    
                 self.ready = True
                 '''
                 if Map.checkMoveIntegraty(self.id, dir):
@@ -252,10 +258,11 @@ class userThread(threading.Thread):
     def computeAction(self):
         self.ready = False
         self.command.append("compute")
-        print("compute")
+        #print("compute")
 
     def getAction(self):
         if not self.ready:
+            #print("kerker")
             return None
         return self.direction
 
@@ -275,7 +282,7 @@ class UI(web.RequestHandler):
 class Socket(websocket.WebSocketHandler):
     id = -1
     def open(self):
-        print("haha")
+        #print("haha")
         # save websocket if connection constructed
         if(Map.user_count >= MAX_USER):
             print("user number exceeded, connection closing...")
@@ -390,13 +397,13 @@ def clock(delay):
         #get computed action
 
         ids = Map.id_list[:]
-        print(ids)
+        #print(ids)
 
-        print(str(count - (time.time() - t0)))
+        #print(str(count - (time.time() - t0)))
         while len(ids) != 0 and time.time() - t0 < count:
             id = ids.pop(0)
             action[id] = Map.users[id].thread.getAction()
-            if action[user] == None:
+            if action[id] == None:
                 ids.append(id)
 
         '''
@@ -416,6 +423,7 @@ def clock(delay):
         #print(action)
         for user in Map.users:
             if(action[user] == None):
+                #print("haha")
                 action[user] = 'h'
             if(Map.belong[Map.users[user].position[0]][Map.users[user].position[1]] == user):
                 message[user] = {'position': Map.users[user].position[:],'direction': action[user], 'isOccupy': True}
@@ -423,17 +431,17 @@ def clock(delay):
                 message[user] = {'position': Map.users[user].position[:],'direction': action[user], 'isOccupy': False}
 
         #send user information
-        print message[]
+        print(message)
         for user in Map.users:
             if(Map.users[user].online):
                 Map.users[user].socket.write_message({'move': message})
-        print(str(time.time() - t0))
+        #print(str(time.time() - t0))
         remain = count - (time.time() - t0)
         if(remain > 0):
             time.sleep(remain)
             #count -= 1
-        print(str(time.time() - t0))
-        print("======================")
+        #print(str(time.time() - t0))
+        #print("======================")
 
     #To do: game over, calculate score and exit
     score = Map.scoring()

@@ -33,6 +33,7 @@ var conObj = {
         sendMsg: function(message){
             var msg = {code: message};
             console.log(conObj.socket.send(JSON.stringify(msg)));
+            console.log(message);
         },
         showMsg: function(message){
             var data = JSON.parse(message);
@@ -49,7 +50,7 @@ var conObj = {
                     case "myname"://myname
 
                         myname = data[key];
-                        //alert("myname " + myname);
+                        console.log("myname " + myname);
                         break;
                     case "username"://username[]
                         username = data[key];
@@ -60,7 +61,7 @@ var conObj = {
                         break;
                     case "move"://move[]
                         move = data[key];
-                        console.log("move "+move[0].action);
+                        //console.log("move "+move[0].isOccupy);
                         movePlayers(move);
                         break;
                     case "score":
@@ -74,12 +75,13 @@ var conObj = {
                         playerObjArr[myname].elem.css("zIndex", 90-myname);
                         moveMe(playerObjArr[myname],0,data[key][0]);
                         moveMe(playerObjArr[myname],1,data[key][1]);
+                        changeFloor(myname,0,0,data[key][1],data[key][0]);
                         //alert("0x:"+data[key][1]+" 0y:"+data[key][0]);
                         //alert("x:"+playerObjArr[myname].x+" y:"+playerObjArr[myname].y);
 
                         break;
                     default:
-                        alert("showMsg error!"+key+" "+data[key]);
+                        alert("Syntax Error!");
                         break;
                 }
 
@@ -97,24 +99,27 @@ function playerObj(playerName,playerNum,x,y){
     var playerImg;
     switch(playerNum){
         case 0:
-            playerImg = "vader";
+            playerImg = "platearmor";
             break;
         case 1:
-            playerImg = "R2D2";
+            playerImg = "deathknight";
             break;
         case 2:
-            playerImg = "trooper";
+            playerImg = "fox";
             break;
         case 3:
-        	playerImg = "ewok";
+        	playerImg = "leatherarmor";
         	break;
         default:
             //alert("playerNum overflow "+playerNum);
             break;
     }
-    $("#board").append("<div class='Player' id='"+playerName+"'><img src='./static/"+playerImg+".png'></div>");
+    $("#board").append("<div class='Player' id='"+playerName+"'></div>");
 
     this.elem = $('#'+playerName);
+
+    this.elem.css("background-image","url(../static/"+playerImg+".png)");
+    this.elem.css({"top":"-24px","left":"-10px"});
 }
 function createPlayer(username,userinit){
     for(var i = 0; i < username.length; i++){
@@ -122,12 +127,16 @@ function createPlayer(username,userinit){
             var p = new playerObj(username[i],i,0,0);
             playerObjArr[i] = p;
             playerObjArr[i].elem.css("zIndex", 90-i);
+            console.log("@@@@@@@@@@userinit[i][0]: "+userinit[i][0]+" userinit[i][1]: "+userinit[i][1]);
             moveMe(playerObjArr[i],0,userinit[i][0]);
             moveMe(playerObjArr[i],1,userinit[i][1]);
+            
             //moveMe(playerObjArr[i],0,15);
             //moveMe(playerObjArr[i],1,30);
 
             //alert(playerObjArr[i].elem.css('zIndex'));
+            changeFloor(i,0,0,userinit[i][1],userinit[i][0]);
+            console.log("@@@@@@@@@@");
         }
     }
 }
@@ -163,38 +172,27 @@ function showBoard(){
             var ran=Math.floor((Math.random() * 9))
             if(super_Board[y][x]==0){
                 clonePiece = piece[0].cloneNode(true);
+                //clonePiece.style.backgroundImage="url(../static/Grass0.png)";
             }
             else if(super_Board[y][x]==1){
                 clonePiece = piece[1].cloneNode(true);
+                //clonePiece.style.backgroundImage="url(../static/Rock.png)";
             }
             else if(super_Board[y][x]==2){
                 clonePiece = piece[2].cloneNode(true);
+                //clonePiece.style.backgroundImage="url(../static/Flower.png)";
             }
             else if(super_Board[y][x]==3){
                 clonePiece = piece[3].cloneNode(true);
+                //clonePiece.style.backgroundImage="url(../static/Tree.png)";
             }
             else{
                 
             }
-            /*
-            if(ran==2){
-                clonePiece = piece[2].cloneNode(true);
-            }
-            else if(ran==3){
-                clonePiece = piece[3].cloneNode(true);
-            }
-            else{
-                if(ran<=6){
-                    clonePiece = piece[0].cloneNode(true);
-                }
-                else{
-                    clonePiece = piece[0].cloneNode(true);
-                }
-            }*/
             clonePiece.id = x+","+y;
             board_position[y].push(clonePiece.id);
             clonePiece.onclick = function(){
-                alert("coordinate:"+this.id);
+                //alert("coordinate:"+this.id);
             }
             clonePiece.style.left=x*32+"px";
             clonePiece.style.top=y*32+"px";
@@ -203,64 +201,199 @@ function showBoard(){
     }
 
 }
+function changeFloor(id,x,y,toX,toY){
+    var board_name = toX+","+toY;
+    var imgIndex = super_Board[toY][toX];
+    //console.log("board_name:"+board_name);
+    //console.log("imgIndex:"+imgIndex);
+
+    //console.log(document.getElementById(board_name).src);
+    var bn = document.getElementById(board_name);
+    if(id==0){
+        //console.log("id:"+id);
+        switch(imgIndex){
+            case 0:
+                //bn.style.backgroundImage = "url(./static/Yellow/Yellow_Grass.png)";
+                bn.className = "";
+                bn.className += "YCell0";
+                break;
+            case 1:
+                //bn.style.backgroundImage = "url(./static/Yellow/Yellow_Rock.png)";
+                bn.className = "";
+                bn.className += "YCell1";
+                break;
+            case 2:
+                //bn.style.backgroundImage = "url(./static/Yellow/Yellow_Flower.png)";
+                bn.className = "";
+                bn.className += "YCell2";
+                break;
+        }
+    }
+    else if (id==1){
+        //console.log("id:"+id);
+        switch(imgIndex){
+            case 0:
+                //bn.style.backgroundImage = "url(./static/Purple/Purple_Grass.png)";
+                bn.className = "";
+                bn.className += "PCell0";
+                break;
+            case 1:
+                //bn.style.backgroundImage = "url(./static/Purple/Purple_Rock.png)";
+                bn.className = "";
+                bn.className += "PCell1";
+                break;
+            case 2:
+                //bn.style.backgroundImage = "url(./static/Purple/Purple_Flower.png)";
+                bn.className = "";
+                bn.className += "PCell2";
+                break;
+        }
+    }
+    else if(id==2){
+        //console.log("id:"+id);
+        switch(imgIndex){
+            case 0:
+                //bn.style.backgroundImage = "url(./static/Red/Red_Grass.png)";
+                bn.className = "";
+                bn.className += "RCell0";
+                break;
+            case 1:
+                //bn.style.backgroundImage = "url(./static/Red/Red_Rock.png)";
+                bn.className = "";
+                bn.className += "RCell1";
+                break;
+            case 2:
+                //bn.style.backgroundImage = "url(./static/Red/Red_Flower.png)";
+                bn.className = "";
+                bn.className += "RCell2";
+                break;
+        }
+    }
+    else if(id==3){
+        //console.log("id:"+id);
+        switch(imgIndex){
+            case 0:
+                //bn.style.backgroundImage = "url(./static/Blue/Blue_Grass.png)";
+                bn.className = "";
+                bn.className += "BCell0";
+                break;
+            case 1:
+                //bn.style.backgroundImage = "url(./static/Blue/Blue_Rock.png)";
+                bn.className = "";
+                bn.className += "BCell1";
+                break;
+            case 2:
+                //bn.style.backgroundImage = "url(./static/Blue/Blue_Flower.png)";
+                bn.className = "";
+                bn.className += "BCell2";
+                break;
+        }
+    }
+    else{
+        console.log("changeFloor error. "+id);
+    }
+}
 function movePlayers(move){
-    console.log("move.length"+move.length);
     //for(var i = 0; i < move.length ; i++){
     for(id in move){
-        switch(move[id].action){
+        var isHold = 0;
+        console.log("--------------------------player"+id+"("+playerObjArr[id].x+","+playerObjArr[id].y+")");
+        console.log("move[id].direction "+move[id].direction);
+        
+        switch(move[id].direction){
             case "l":
-                moveMe(playerObjArr[id],1,-1);
+                playerObjArr[id].elem.addClass("left");
+                playerObjArr[id].elem.removeClass("up down right");
                 break;
             case "u":
-                moveMe(playerObjArr[id],0,-1);
+                playerObjArr[id].elem.addClass("up");
+                playerObjArr[id].elem.removeClass("down left right");
                 break;
             case "r":
-                moveMe(playerObjArr[id],1,1);
+                playerObjArr[id].elem.addClass("right");
+                playerObjArr[id].elem.removeClass("up down left");
                 break;
             case "d":
-                moveMe(playerObjArr[id],0,1);
+                playerObjArr[id].elem.addClass("down");
+                playerObjArr[id].elem.removeClass("up left right");
+                break;
+            case "h":
+                isHold = 1;
                 break;
             default:
                 //alert("movePlayers error");
                 break;
         }
-        if(move[id].isOccupy){
-            //occupy the land
-            console.log("occupy");
+        if(isHold==0){
+            var temp_l=move[id].position[1]-playerObjArr[id].x,temp_u=move[id].position[0]-playerObjArr[id].y;
+            var pX = playerObjArr[id].x, pY = playerObjArr[id].y,toX = move[id].position[1], toY = move[id].position[0];
+            console.log("temp_l:"+temp_l+" temp_u:"+temp_u);
+            console.log("move[id].position[1]: "+move[id].position[1]+" move[id].position[0]: "+move[id].position[0]);
+            console.log("playerObjArr[id].x: "+playerObjArr[id].x+ " playerObjArr[id].y:"+playerObjArr[id].y);
+
+            if(temp_l!=0){
+                moveMe(playerObjArr[id],1,temp_l);
+                if(move[id].isOccupy)    changeFloor(id,pX,pY,toX,toY);
+            }
+            if(temp_u!=0){
+                moveMe(playerObjArr[id],0,temp_u);
+                if(move[id].isOccupy)    changeFloor(id,pX,pY,toX,toY);
+            }
         }
+        console.log("-------------------------------------------------");
     }   
 }
 function moveMe(me,left,mv){
+    console.log(me.x+" "+me.y+"{{{{{{{moveMe}}}}}}"+left+" "+mv);
     if(left==1){
-        me.elem.animate({left:"+="+mv*32+"px"},'fast');
-        if(mv>0){
-            if((me.x % 30) == 29){
-                moveBoard(BoardObj,1,-30);
-            }
+        if(me.x+mv >= 0 && me.x+mv <= 89){
+            console.log("hello.");
+            me.elem.animate({left:"+="+mv*32+"px"},{
+            duration:'fast',start:function(){
+                    console.log("[moveme]in x:"+me.x);
+                    if(me.playerName == myname){
+                        if(mv>0){        
+                            if((me.x % 30) == 29 ){
+                                moveBoard(BoardObj,1,-30);
+                            }
+                        }
+                        else{
+                            if((me.x % 30) == 0){
+                                moveBoard(BoardObj,1,30);
+                            }
+                        }
+                    }
+                }
+            });
+            me.x+=mv;
+            console.log("[moveme]out x:"+me.x);
         }
-        else{
-            if((me.x % 30) == 0){
-                moveBoard(BoardObj,1,30);
-            }
-        }
-        me.x+=mv;
-        //alert("me.x:"+me.x);
     }
     else{
-        me.elem.animate({top:"+="+mv*32+"px"},'fast');
-        if(mv>0){
-            if((me.y % 15) == 14){
-                moveBoard(BoardObj,0,-15);
-            }
+        if(me.y+mv >= 0 && me.y+mv <= 44){
+            me.elem.animate({top:"+="+mv*32+"px"},{
+            duration:'fast',
+                start:function(){
+                    console.log("[moveme]in y:"+me.y);
+                    if(me.playerName == myname){
+                        if(mv>0){
+                            if((me.y % 15) == 14){
+                                moveBoard(BoardObj,0,-15);
+                            }
+                        }
+                        else{
+                            if((me.y % 15) == 0){
+                                moveBoard(BoardObj,0,15);
+                            }
+                        }
+                    }
+                }
+            });
+            me.y+=mv;
+            console.log("[moveme]out y:"+me.y);
         }
-        else{
-            if((me.y % 15) == 0){
-                moveBoard(BoardObj,0,15);
-            }
-        }
-        me.y+=mv;
-        //alert("me.y:"+me.y);
     }
+    console.log("{{{{{{{moveMe}}}}}}");
 }
 
 function moveBoard(boardObj,left,mv){
@@ -337,6 +470,12 @@ $(document).ready(function() {
             e.preventDefault();
         }
     });
+    /*$( "form" ).submit(function( event ) {
+        conObj.sendMsg($("textarea:first").val());
+        console.log($("textarea:first").val());
+        event.preventDefault();
+    });
+    conObj.init()*/
     
     /*myname = 0;
     username.push("Me");

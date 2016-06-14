@@ -1,3 +1,8 @@
+textarea{
+    width: 960px;
+    height: 105px;
+}
+
 head {
 	background-color: #000000;
 }
@@ -16,8 +21,14 @@ title{
 	border-style: outset;
     border-width: 5px;
     border-color:#4e2d05;
-	margin: auto;
+    margin: auto;
 	overflow: hidden;
+    /*position:absolute;
+	left:50%;
+	top:60%;
+	margin-left:-480px;
+	margin-top: -240px;
+	overflow: hidden;*/
 }
 
 .Board{
@@ -37,18 +48,157 @@ title{
     border-color:#4e2d05;*/
 }
 
-.Cell{
+.Cell0{
 	width:32px;
 	height:32px;
 	position:absolute;
 	z-index: 0;
+	background-size: 32px 32px;
+    background-repeat: no-repeat;
+    background-image: url("../static/Grass0.png");
 }
-
-.Player{
+.Cell1{
 	width:32px;
 	height:32px;
 	position:absolute;
+	z-index: 0;
+	background-size: 32px 32px;
+    background-repeat: no-repeat;
+    background-image: url("../static/Rock.png");
+}
+.Cell2{
+	width:32px;
+	height:32px;
+	position:absolute;
+	z-index: 0;
+	background-size: 32px 32px;
+    background-repeat: no-repeat;
+    background-image: url("../static/Flower.png");
+}
+.Cell3{
+	width:32px;
+	height:32px;
+	position:absolute;
+	z-index: 0;
+	background-size: 32px 32px;
+    background-repeat: no-repeat;
+    background-image: url("../static/Tree.png");
+}
+.PCell0{
 
+	width:32px;
+	height:32px;
+	position:absolute;
+	z-index: 0;
+	background-size: 32px 32px;
+    background-repeat: no-repeat;
+    background-image: url("./Purple/Purple_Grass.png");
+}
+.PCell1{
+	width:32px;
+	height:32px;
+	position:absolute;
+	z-index: 0;
+	background-size: 32px 32px;
+    background-repeat: no-repeat;
+    background-image: url("./Purple/Purple_Rock.png");
+}
+.PCell2{
+	width:32px;
+	height:32px;
+	position:absolute;
+	z-index: 0;
+	background-size: 32px 32px;
+    background-repeat: no-repeat;
+    background-image: url("./Purple/Purple_Flower.png");
+}
+.BCell0{
+	width:32px;
+	height:32px;
+	position:absolute;
+	z-index: 0;
+	background-size: 32px 32px;
+    background-repeat: no-repeat;
+    background-image: url("./Blue/Blue_Grass.png");
+}
+.BCell1{
+	width:32px;
+	height:32px;
+	position:absolute;
+	z-index: 0;
+	background-size: 32px 32px;
+    background-repeat: no-repeat;
+    background-image: url("./Blue/Blue_Rock.png");
+}
+.BCell2{
+	width:32px;
+	height:32px;
+	position:absolute;
+	z-index: 0;
+	background-size: 32px 32px;
+    background-repeat: no-repeat;
+    background-image: url("./Blue/Blue_Flower.png");
+}
+.RCell0{
+	width:32px;
+	height:32px;
+	position:absolute;
+	z-index: 0;
+	background-size: 32px 32px;
+    background-repeat: no-repeat;
+    background-image: url("./Red/Red_Grass.png");
+}
+.RCell1{
+	width:32px;
+	height:32px;
+	position:absolute;
+	z-index: 0;
+	background-size: 32px 32px;
+    background-repeat: no-repeat;
+    background-image: url("./Red/Red_Rock.png");
+}
+.RCell2{
+	width:32px;
+	height:32px;
+	position:absolute;
+	z-index: 0;
+	background-size: 32px 32px;
+    background-repeat: no-repeat;
+    background-image: url("./Red/Red_Flower.png");
+}
+.YCell0{
+	width:32px;
+	height:32px;
+	position:absolute;
+	z-index: 0;
+	background-size: 32px 32px;
+    background-repeat: no-repeat;
+    background-image: url("./Yellow/Yellow_Grass.png");
+}
+.YCell1{
+	width:32px;
+	height:32px;
+	position:absolute;
+	z-index: 0;
+	background-size: 32px 32px;
+    background-repeat: no-repeat;
+    background-image: url("./Yellow/Yellow_Rock.png");
+}
+.YCell2{
+	width:32px;
+	height:32px;
+	position:absolute;
+	z-index: 0;
+	background-size: 32px 32px;
+    background-repeat: no-repeat;
+    background-image: url("./Yellow/Yellow_Flower.png");
+}
+
+.Player{
+	width:56px;
+	height:56px;
+	position:absolute;
+	background-size:500% 400%;
 }
 
 img{
@@ -56,7 +206,116 @@ img{
 	height:32px;
 }
 
-textarea{
-    width: 960px;
-    height: 105px;
+
+
+.right {
+	-webkit-animation: rightframe .9s steps(5) infinite;
+	-moz-animation: rightframe .9s steps(5) infinite;
+	-ms-animation: rightframe .9s steps(5) infinite;
+	-o-animation: rightframe .9s steps(5) infinite;
+	animation: rightframe .9s steps(5) infinite;
+}
+@-webkit-keyframes rightframe {
+	from { background-position: 0% 0%; }
+	to { background-position: -500% 0%; }
+}
+@-moz-keyframes rightframe {
+	from { background-position: 0% 0%; }
+	to { background-position: -500% 0%; }
+}
+@-ms-keyframes rightframe {
+	from { background-position: 0% 0%; }
+	to { background-position: -500% 0%; }
+}
+@-o-keyframes rightframe {
+	from { background-position: 0% 0%; }
+	to { background-position: -500% 0%; }
+}
+@-keyframes rightframe {
+	from { background-position: 0% 0%; }
+	to { background-position: -500% 0%; }
+}
+
+.left {
+	-webkit-animation: leftframe .9s steps(5) infinite;
+	-moz-animation: leftframe .9s steps(5) infinite;
+	-ms-animation: leftframe .9s steps(5) infinite;
+	-o-animation: leftframe .9s steps(5) infinite;
+	animation: leftframe .9s steps(5) infinite;
+}
+@-webkit-keyframes leftframe {
+	from { background-position: 0% -100%; }
+	to { background-position: -500% -100%; }
+}
+@-moz-keyframes leftframe {
+	from { background-position: 0% -100%; }
+	to { background-position: -500% -100%; }
+}
+@-ms-keyframes leftframe {
+	from { background-position: 0% -100%; }
+	to { background-position: -500% -100%; }
+}
+@-o-keyframes leftframe {
+	from { background-position: 0% -100%; }
+	to { background-position: -500% -100%; }
+}
+@-keyframes leftframe {
+	from { background-position: 0% -100%; }
+	to { background-position: -500% -100%; }
+}
+
+.up {
+	-webkit-animation: upframe .9s steps(5) infinite;
+	-moz-animation: upframe .9s steps(5) infinite;
+	-ms-animation: upframe .9s steps(5) infinite;
+	-o-animation: upframe .9s steps(5) infinite;
+	animation: upframe .9s steps(5) infinite;
+}
+@-webkit-keyframes upframe {
+	from { background-position: 0% -200%; }
+	to { background-position: -500% -200%; }
+}
+@-moz-keyframes upframe {
+	from { background-position: 0% -200%; }
+	to { background-position: -500% -200%; }
+}
+@-ms-keyframes upframe {
+	from { background-position: 0% -200%; }
+	to { background-position: -500% -200%; }
+}
+@-o-keyframes upframe {
+	from { background-position: 0% -200%; }
+	to { background-position: -500% -200%; }
+}
+@-keyframes upframe {
+	from { background-position: 0% -200%; }
+	to { background-position: -500% -200%; }
+}
+
+.down {
+	-webkit-animation: downframe .9s steps(5) infinite;
+	-moz-animation: downframe .9s steps(5) infinite;
+	-ms-animation: downframe .9s steps(5) infinite;
+	-o-animation: downframe .9s steps(5) infinite;
+	animation: downframe .9s steps(5) infinite;
+}
+@-webkit-keyframes downframe {
+	from { background-position: 0% -300%; }
+	to { background-position: -500% -300%; }
+}
+@-moz-keyframes downframe {
+	from { background-position: 0% -300%; }
+	to { background-position: -500% -300%; }
+}
+@-ms-keyframes downframe {
+	from { background-position: 0% -300%; }
+	to { background-position: -500% -300%; }
+}
+@-o-keyframes downframe {
+	from { background-position: 0% -300%; }
+	to { background-position: -500% -300%; }
+}
+@-keyframes downframe {
+	from { background-position: 0% -300%; }
+	to { background-position: -500% -300%; }
 }
