@@ -1,9 +1,11 @@
 var super_Board;
 var myname;
-var username = [];
+var username;
 var userinit;
 var move;
 var score;
+var BoardObj;
+var Me;
 
 var board = [];
 var board_position = [];
@@ -11,12 +13,86 @@ var piece = [];
 var boardPiece;
 var playerObjArr = [];
 
+var conObj = {
+        host: location.host,
+        socket: null,
+
+        init: function(){
+            var url = "ws://" + conObj.host + "/socket";
+            conObj.socket = new WebSocket(url);
+            conObj.socket.onmessage = function(event){
+                conObj.showMsg(event.data);
+            },
+            conObj.socket.onclose = function(event){
+                console.log("on close");
+            },
+            conObj.socket.onerror = function(event){
+                console.log("on error");
+            }
+        },
+        sendMsg: function(message){
+            var msg = {code: message};
+            console.log(conObj.socket.send(JSON.stringify(msg)));
+        },
+        showMsg: function(message){
+            var data = JSON.parse(message);
+            //$("#message").append(data.playerObj.playerName+"<br/>");
+            //$("#message").append(data + "<br/>");
+            for(key in data){
+                switch(key){
+                    case "map"://map[][]
+                        super_Board = data[key];
+                        BoardObj = {elem:$('#board'),x:0,y:0};
+                        BoardObj.elem.css({"top":"-480px","left":"-960px"});
+                        initBoard();
+                        break;
+                    case "myname"://myname
+
+                        myname = data[key];
+                        //alert("myname " + myname);
+                        break;
+                    case "username"://username[]
+                        username = data[key];
+                        break;
+                    case "userinit"://userinit[] (.x .y)
+                        userinit = data[key];
+                        createPlayer(username,userinit);
+                        break;
+                    case "move"://move[]
+                        move = data[key];
+                        console.log("move "+move[0].action);
+                        movePlayers(move);
+                        break;
+                    case "score":
+                        score = data[key];
+                        break;
+                    case "position":
+                        //alert("myname: " + myname);
+                        var p = new playerObj(myname,myname,data[key][0],data[key][1]);
+                        
+                        playerObjArr[myname] = p;
+                        playerObjArr[myname].elem.css("zIndex", 90-myname);
+                        moveMe(playerObjArr[myname],0,data[key][0]);
+                        moveMe(playerObjArr[myname],1,data[key][1]);
+                        //alert("0x:"+data[key][1]+" 0y:"+data[key][0]);
+                        //alert("x:"+playerObjArr[myname].x+" y:"+playerObjArr[myname].y);
+
+                        break;
+                    default:
+                        alert("showMsg error!"+key+" "+data[key]);
+                        break;
+                }
+
+            }
+        }
+    };
+
 //class
 function playerObj(playerName,playerNum,x,y){
     this.playerName = playerName;
     this.playerNum = playerNum;
-    this.x = x;
-    this.y = y;
+    this.x = 0;
+    this.y = 0;
 
     var playerImg;
     switch(playerNum){
@@ -30,27 +106,43 @@ function playerObj(playerName,playerNum,x,y){
             playerImg = "trooper";
             break;
         case 3:
-        	playerImg = "ewok";
-        	break;
+            playerImg = "ewok";
+            break;
         default:
-            alert("playerNum overflow "+playerNum);
+            //alert("playerNum overflow "+playerNum);
             break;
     }
-    $("#board").append("<div class='Player' id='"+playerName+"'><img src='./png/"+playerImg+".png'></div>");
+    $("#board").append("<div class='Player' id='"+playerName+"'></div>");
 
     this.elem = $('#'+playerName);
+
+    this.elem.css("width","=64px");
+    this.elem.css("height","=64px");
+    this.elem.css("background-image","url(./static/"+playerImg+".png)");
+    this.elem.css("background-size","500% 400%");
+
+    this.elem.css({"top":"-32px","left":"-16px"});
+    console.log(this.elem);
+    
+    /* $( this ).css( "width", "+=200" );});*/
+    /*width:64px;
+    height:64px;
+    background-image: url(../png/fox.png);
+    background-size: 500% 400%;*/
 }
 function createPlayer(username,userinit){
     for(var i = 0; i < username.length; i++){
-        var p = new playerObj(username[i],i,0,0);
-        playerObjArr.push(p);
-        playerObjArr[i].elem.css("zIndex", 90-i);
-        //moveMe(playerObjArr[i],0,userinit[i].y);
-        //moveMe(playerObjArr[i],1,userinit[i].x);
-        moveMe(playerObjArr[i],0,15);
-        moveMe(playerObjArr[i],1,30);
+        if(username[i]!=myname){
+            var p = new playerObj(username[i],i,0,0);
+            playerObjArr[i] = p;
+            playerObjArr[i].elem.css("zIndex", 90-i);
+            moveMe(playerObjArr[i],0,userinit[i].y);
+            moveMe(playerObjArr[i],1,userinit[i].x);
+            //moveMe(playerObjArr[i],0,15);
+            //moveMe(playerObjArr[i],1,30);
 
-        alert(playerObjArr[i].elem.css('zIndex'));
+            //alert(playerObjArr[i].elem.css('zIndex'));
+        }
     }
 }
 
@@ -83,23 +175,22 @@ function showBoard(){
     for(var y=0;y<45;y++){
         for(var x=0;x<90;x++){
             var ran=Math.floor((Math.random() * 9))
-            /*
-            if(map[y][x]==0){
+            if(super_Board[y][x]==0){
                 clonePiece = piece[0].cloneNode(true);
             }
-            else if(map[y][x]==1){
-                clonePiece = piece[0].cloneNode(true);
+            else if(super_Board[y][x]==1){
+                clonePiece = piece[1].cloneNode(true);
             }
-            else if(map[y][x]==2){
+            else if(super_Board[y][x]==2){
                 clonePiece = piece[2].cloneNode(true);
             }
-            else if(map[y][x]==3){
+            else if(super_Board[y][x]==3){
                 clonePiece = piece[3].cloneNode(true);
             }
             else{
                 
             }
-            */
+            /*
             if(ran==2){
                 clonePiece = piece[2].cloneNode(true);
             }
@@ -113,7 +204,7 @@ function showBoard(){
                 else{
                     clonePiece = piece[0].cloneNode(true);
                 }
-            }
+            }*/
             clonePiece.id = x+","+y;
             board_position[y].push(clonePiece.id);
             clonePiece.onclick = function(){
@@ -127,57 +218,70 @@ function showBoard(){
 
 }
 function movePlayers(move){
-    for(var i = 0; i < move.length ; i++){
-        switch(move[i].action){
+    console.log("move.length"+move.length);
+    //for(var i = 0; i < move.length ; i++){
+    for(id in move){
+        switch(move[id].action){
             case "l":
-                moveMe(playerObjArr[i],1,-1);
+                moveMe(playerObjArr[id],1,-1);
                 break;
             case "u":
-                moveMe(playerObjArr[i],0,-1);
+                moveMe(playerObjArr[id],0,-1);
                 break;
             case "r":
-                moveMe(playerObjArr[i],1,1);
+                moveMe(playerObjArr[id],1,1);
                 break;
             case "d":
-                moveMe(playerObjArr[i],0,1);
+                moveMe(playerObjArr[id],0,1);
                 break;
             default:
-                alert("movePlayers error");
+                //alert("movePlayers error");
                 break;
         }
-        if(move[i].isOccupy){
+        if(move[id].isOccupy){
             //occupy the land
+            console.log("occupy");
         }
     }   
 }
 function moveMe(me,left,mv){
     if(left==1){
-        me.elem.animate({left:"+="+mv*32+"px"},'slow');
-        if(mv>0){
-            if((me.x % 30) == 29){
-                moveBoard(BoardObj,1,-30);
+        if(me.x+mv > 0 && me.x+mv < 89){
+            me.elem.animate({left:"+="+mv*32+"px"},'fast');
+            if(me.playerName == myname){
+                if(mv>0){
+                    if((me.x % 30) == 29){
+                        moveBoard(BoardObj,1,-30);
+                    }
+                }
+                else{
+                    if((me.x % 30) == 0){
+                        moveBoard(BoardObj,1,30);
+                    }
+                }
             }
+            me.x+=mv;
+            //alert("me.x:"+me.x);
         }
-        else{
-            if((me.x % 30) == 0){
-                moveBoard(BoardObj,1,30);
-            }
-        }
-        me.x+=mv;
     }
     else{
-        me.elem.animate({top:"+="+mv*32+"px"},'slow');
-        if(mv>0){
-            if((me.y % 15) == 14){
-                moveBoard(BoardObj,0,-15);
+        if(me.y+mv > 0 && me.y+mv < 44){
+            me.elem.animate({top:"+="+mv*32+"px"},'fast');
+            if(me.playerName == myname){
+                if(mv>0){
+                    if((me.y % 15) == 14){
+                        moveBoard(BoardObj,0,-15);
+                    }
+                }
+                else{
+                    if((me.y % 15) == 0){
+                        moveBoard(BoardObj,0,15);
+                    }
+                }
             }
+            me.y+=mv;
+            //alert("me.y:"+me.y);
         }
-        else{
-            if((me.y % 15) == 0){
-                moveBoard(BoardObj,0,15);
-            }
-        }
-        me.y+=mv;
     }
 }
 
@@ -190,7 +294,7 @@ function moveBoard(boardObj,left,mv){
     }
 }
 
-function playerKeyDown(me,BoardObj,conObj){
+function playerKeyDown(me,BoardObj){
     $(document).keydown(function(key) {
         switch(parseInt(key.which,10)) {
             // Left arrow key pressed
@@ -240,66 +344,14 @@ function playerKeyDown(me,BoardObj,conObj){
 
 $(document).ready(function() {
     board_position = Create2DArray(45);
-    var BoardObj = {elem:$('#board'),x:0,y:0};
-
-    var connectObj = {
-        host: location.host,
-        socket: null,
-
-        init: function(){
-            var url = "ws://" + connectObj.host + "/socket";
-            connectObj.socket = new WebSocket(url);
-            connectObj.socket.onmessage = function(event){
-                connectObj.showMsg(event.data);
-            },
-            connectObj.socket.onclose = function(event){
-                console.log("on close");
-            },
-            connectObj.socket.onerror = function(event){
-                console.log("on error");
-            }
-        },
-        sendMsg: function(){
-            var msg = {playerObj:Me};
-            connectObj.socket.send(JSON.stringify(msg));
-        },
-        showMsg: function(){
-            var data = JSON.parse(message);
-            $("#message").append(data.playerObj.playerName+"<br/>");
-            for(key in data){
-                switch(key){
-                    case "map"://map[][]
-                        super_Board = data[key];
-                        break;
-                    case "myname"://myname
-                        myname = data[key];
-                        break;
-                    case "username"://username[]
-                        username = data[key];
-                        break;
-                    case "userinit"://userinit[] (.x .y)
-                        userinit = data[key];
-                        createPlayer(username,userinit);
-                        break;
-                    case "move"://move[]
-                        move = data[key];
-                        movePlayers(move);
-                        break;
-                    case "score":
-                        score = data[key];
-                        break;
-                    default:
-                        alert("showMsg error!");
-                        break;
-                }
-
-            }
-        }
-    };
-
-    BoardObj.elem.css({"top":"-480px","left":"-960px"});
-    initBoard();
-    myname = 0;
+    
+    $( "form" ).submit(function( event ) {
+        conObj.sendMsg($("textarea:first").val());
+        event.preventDefault();
+    });
+    conObj.init()
+    
+    /*myname = 0;
     username.push("Me");
     username.push("R2D2");
     username.push("Trooper");
@@ -319,6 +371,6 @@ $(document).ready(function() {
     moveMe(playerObjArr[2],0,7);
     moveMe(playerObjArr[3],1,15);
     moveMe(playerObjArr[3],0,7);
-    moveMe(playerObjArr[3],0,-7);
+    moveMe(playerObjArr[3],0,-7);*/
 
 });

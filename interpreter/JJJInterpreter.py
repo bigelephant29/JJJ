@@ -275,7 +275,7 @@ class JJJInterpreter:
                 if sub in newLabelDict:
                     print ('[ERROR] use the same label twice')
                     return i
-                newLabelDict[sub] = i
+                newLabelDict[sub] = len(newCommandList)
                 newCommandList.append((self.CommandType.label,sub));
             else:
                 # Assign/Operation Type
@@ -302,7 +302,7 @@ class JJJInterpreter:
         
 def main():
     inte = JJJInterpreter()
-    inte.sendCommand('if 2\n$1=2')
+    inte.sendCommand('jump 1\nlabel 0\nup\njump 0\n\nlabel 1\ndown\njump 1\nlabel 2\nleft\njump 2\nlabel 3\nright\njump 3')
     while True:
         inputString = input()
         if inputString == 'print':
