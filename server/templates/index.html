@@ -10,8 +10,9 @@
         <script type="text/javascript" src="../static/boardscript.js"></script>
     </head>
 	<body>
-        <div class="Title"><h1>JJJ</h1></div>
+        <!--<div class="Title"><h1>JJJ</h1></div>-->
         <div class="Window">
+            <div class="Loading"><h1>Loading...</h1></div>
             <div class="Board" id="board">
                 <div class="Cell0"></div>
                 <div class="Cell1"></div>
@@ -20,16 +21,9 @@
                 
             </div>
         </div>
-
         <div class="Main">
-            <form>
-                <div>
-                    <textarea id="code" class="linedtext"></textarea>
-                        <br />
-                    <!--<input type="submit"/>-->
-                </div>
-            </form>
-        </div>
-       
+            <textarea id="code" class="linedtext"></textarea>
+            <div id="message"></div>
+        </div>       
 	</body>
 </html>

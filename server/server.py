@@ -49,6 +49,7 @@ class User:
         self.thread = thread
         self.position = [y, x]
         self.online = True
+        self.isReady = False
 
 
 #manage user
@@ -326,7 +327,12 @@ class Socket(websocket.WebSocketHandler):
         d = json.loads(message)
         print (d)
         
-        Map.users[self.id].thread.changeCode(d['code'])
+        for key in d:
+            if(key == 'ready'):
+                print("receive")
+                Map.users[self.id].isReady = True
+            elif(key == 'code'):    
+                Map.users[self.id].thread.changeCode(d['code'])
         
         '''
         for user in Map.users:
@@ -360,20 +366,19 @@ class Application(web.Application):
 def clock(delay):
     
     while Map.user_count < MAX_USER:
+        #print(Map.user_count)
         pass
     
-    print("user preparing...")
-    global isStart
-    isStart = True
-    print(isStart)
-    count = PREPARE_TIME
-
-    while count > 0:
-        print (count)
-        time.sleep(1)
-        count -= 1
-
-    print("game start!!")
+    
+    while True:
+        readycount = 0
+        #print(len(notReady))
+        for user in Map.users:
+            if(Map.users[user].isReady):
+                readycount += 1
+        if(readycount == MAX_USER):
+            break
+    
     userinit = []
     for user in Map.id_list:
         userinit.append([Map.users[user].position[0], Map.users[user].position[1]])
@@ -382,6 +387,22 @@ def clock(delay):
         if(Map.users[user].online):
             Map.users[user].socket.write_message({'username': Map.id_list})
             Map.users[user].socket.write_message({'userinit': userinit})
+    
+    print("user preparing...")
+    global isStart
+    isStart = True
+    print(isStart)
+    count = PREPARE_TIME
+
+    while count > 0:
+        time.sleep(1)
+        count -= 1
+        print (count)
+        for user in Map.users:
+            if(Map.users[user].online):
+                Map.users[user].socket.write_message({'remaintime': count})
+        
+    print("game start!!")
 
 
     count = 0

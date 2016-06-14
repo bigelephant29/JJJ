@@ -31,7 +31,8 @@ var conObj = {
             }
         },
         sendMsg: function(message){
-            var msg = {code: message};
+            showOnScreen("Updating code...",1);
+            var msg = {"code": message};
             console.log(conObj.socket.send(JSON.stringify(msg)));
             console.log(message);
         },
@@ -46,9 +47,13 @@ var conObj = {
                         BoardObj = {elem:$('#board'),x:0,y:0};
                         BoardObj.elem.css({"top":"-480px","left":"-960px"});
                         initBoard();
+                        $('.Loading').css("display","none");
+                        BoardObj.elem.css("visibility","visible");
+                        showOnScreen("Waiting for more players...");
+                        var msg = {"ready":1};
+                        conObj.socket.send(JSON.stringify(msg));
                         break;
                     case "myname"://myname
-
                         myname = data[key];
                         console.log("myname " + myname);
                         break;
@@ -58,6 +63,7 @@ var conObj = {
                     case "userinit"://userinit[] (.x .y)
                         userinit = data[key];
                         createPlayer(username,userinit);
+                        showOnScreen("Ready?");
                         break;
                     case "move"://move[]
                         move = data[key];
@@ -66,6 +72,10 @@ var conObj = {
                         break;
                     case "score":
                         score = data[key];
+                        var cnt = 1;
+                        for(var id in score)
+                            cnt += (score[id]>score[myname]);
+                        showOnScreen("Rank #"+cnt);
                         break;
                     case "position":
                         //alert("myname: " + myname);
@@ -80,14 +90,32 @@ var conObj = {
                         //alert("x:"+playerObjArr[myname].x+" y:"+playerObjArr[myname].y);
 
                         break;
+                    case "error":
+                        showOnScreen("Error: line #"+(data[key]+1));
+                        break;
+                    case "remaintime":
+                        var t = data[key]
+                        if(t == 0)
+                            showOnScreen("Go!",1);
+                        else
+                            showOnScreen(t);
+                        break;
                     default:
-                        alert("Syntax Error!");
+                        showOnScreen("Unknown message!");
                         break;
                 }
 
             }
         }
     };
+
+  
+function showOnScreen(message,sec){
+    $("#message").text(message);
+    $("#message").css("opacity",1);
+    if(sec != undefined)
+        $("#message").delay(sec*1000).animate({opacity: 0},"slow");
+}
 
 //class
 function playerObj(playerName,playerNum,x,y){
@@ -455,11 +483,6 @@ function playerKeyDown(me,BoardObj){
 
 $(document).ready(function() {
     board_position = Create2DArray(45);
-    
-    $( "form" ).submit(function( event ) {
-        conObj.sendMsg($("#code").val());
-        event.preventDefault();
-    });
     conObj.init();
     
     $(".linedtext").linedtextarea();
