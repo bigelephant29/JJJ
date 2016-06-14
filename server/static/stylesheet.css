@@ -1,19 +1,37 @@
-textarea{
-    width: 960px;
-    height: 105px;
+@font-face {
+    font-family: '8bitfont'; /*a name to be used later*/
+    src: url('./PressStart2P.ttf'); /*URL to font*/
 }
 
 head {
 	background-color: #000000;
 }
 body{
-	background-color: #000000;	
+	background-color: #000000;
 }
-title{
+h1{
 	color: #FFFFFF;
+	font-family: '8bitfont';
+    text-align: center;
 }
+
+#code{
+    width: 50%;
+    height: 105px;
+}
+
+#message{
+    width: 50%;
+    padding-top: 40px;
+    font-size: 40px;
+    color: #ff0000;
+}
+
 .Main{
 	text-align: center;
+    width: 960px;
+    margin: auto;
+    display: flex;
 }
 .Window{
 	width:960px;
@@ -31,6 +49,33 @@ title{
 	overflow: hidden;*/
 }
 
+.Loading{
+	width:960px;
+	height:480px;
+	background-color: #000000;
+}
+.Loading h1{
+	text-align: center;
+	position: relative;
+	margin-top: 25%;
+	-webkit-animation: blinker 1s linear infinite;
+	-moz-animation: blinker 1s linear infinite;
+	-o-animation: blinker 1s linear infinite;
+	animation: blinker 1s linear infinite;
+}
+@-webkit-keyframes blinker {  
+  50% { opacity: 0.0; }
+}
+@-moz-keyframes blinker {  
+  50% { opacity: 0.0; }
+}
+@-o-keyframes blinker {  
+  50% { opacity: 0.0; }
+}
+@keyframes blinker {  
+  50% { opacity: 0.0; }
+}
+
 .Board{
 	width:2880px;
 	height:1440px;
@@ -38,6 +83,7 @@ title{
 	height:480px;
 	z-index: 0;
 	position:relative;
+    visibility:hidden;
 	/*vertical-align: middle;
 	left:50%;
 	top:60%;
@@ -211,7 +257,6 @@ img{
 .right {
 	-webkit-animation: rightframe .9s steps(5) infinite;
 	-moz-animation: rightframe .9s steps(5) infinite;
-	-ms-animation: rightframe .9s steps(5) infinite;
 	-o-animation: rightframe .9s steps(5) infinite;
 	animation: rightframe .9s steps(5) infinite;
 }
@@ -223,15 +268,11 @@ img{
 	from { background-position: 0% 0%; }
 	to { background-position: -500% 0%; }
 }
-@-ms-keyframes rightframe {
-	from { background-position: 0% 0%; }
-	to { background-position: -500% 0%; }
-}
 @-o-keyframes rightframe {
 	from { background-position: 0% 0%; }
 	to { background-position: -500% 0%; }
 }
-@-keyframes rightframe {
+@keyframes rightframe {
 	from { background-position: 0% 0%; }
 	to { background-position: -500% 0%; }
 }
@@ -239,7 +280,6 @@ img{
 .left {
 	-webkit-animation: leftframe .9s steps(5) infinite;
 	-moz-animation: leftframe .9s steps(5) infinite;
-	-ms-animation: leftframe .9s steps(5) infinite;
 	-o-animation: leftframe .9s steps(5) infinite;
 	animation: leftframe .9s steps(5) infinite;
 }
@@ -251,15 +291,11 @@ img{
 	from { background-position: 0% -100%; }
 	to { background-position: -500% -100%; }
 }
-@-ms-keyframes leftframe {
-	from { background-position: 0% -100%; }
-	to { background-position: -500% -100%; }
-}
 @-o-keyframes leftframe {
 	from { background-position: 0% -100%; }
 	to { background-position: -500% -100%; }
 }
-@-keyframes leftframe {
+@keyframes leftframe {
 	from { background-position: 0% -100%; }
 	to { background-position: -500% -100%; }
 }
@@ -267,7 +303,6 @@ img{
 .up {
 	-webkit-animation: upframe .9s steps(5) infinite;
 	-moz-animation: upframe .9s steps(5) infinite;
-	-ms-animation: upframe .9s steps(5) infinite;
 	-o-animation: upframe .9s steps(5) infinite;
 	animation: upframe .9s steps(5) infinite;
 }
@@ -279,15 +314,11 @@ img{
 	from { background-position: 0% -200%; }
 	to { background-position: -500% -200%; }
 }
-@-ms-keyframes upframe {
-	from { background-position: 0% -200%; }
-	to { background-position: -500% -200%; }
-}
 @-o-keyframes upframe {
 	from { background-position: 0% -200%; }
 	to { background-position: -500% -200%; }
 }
-@-keyframes upframe {
+@keyframes upframe {
 	from { background-position: 0% -200%; }
 	to { background-position: -500% -200%; }
 }
@@ -295,7 +326,6 @@ img{
 .down {
 	-webkit-animation: downframe .9s steps(5) infinite;
 	-moz-animation: downframe .9s steps(5) infinite;
-	-ms-animation: downframe .9s steps(5) infinite;
 	-o-animation: downframe .9s steps(5) infinite;
 	animation: downframe .9s steps(5) infinite;
 }
@@ -307,15 +337,11 @@ img{
 	from { background-position: 0% -300%; }
 	to { background-position: -500% -300%; }
 }
-@-ms-keyframes downframe {
-	from { background-position: 0% -300%; }
-	to { background-position: -500% -300%; }
-}
 @-o-keyframes downframe {
 	from { background-position: 0% -300%; }
 	to { background-position: -500% -300%; }
 }
-@-keyframes downframe {
+@keyframes downframe {
 	from { background-position: 0% -300%; }
 	to { background-position: -500% -300%; }
 }
