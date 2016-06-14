@@ -47,8 +47,7 @@ var conObj = {
                         BoardObj = {elem:$('#board'),x:0,y:0};
                         BoardObj.elem.css({"top":"-480px","left":"-960px"});
                         initBoard();
-                        $('.Loading').css("display","none");
-                        BoardObj.elem.css("visibility","visible");
+
                         showOnScreen("Waiting for more players...");
                         var msg = {"ready":1};
                         conObj.socket.send(JSON.stringify(msg));
@@ -63,6 +62,8 @@ var conObj = {
                     case "userinit"://userinit[] (.x .y)
                         userinit = data[key];
                         createPlayer(username,userinit);
+						$('.Loading').css("display","none");
+                        BoardObj.elem.css("visibility","visible");
                         showOnScreen("Ready?");
                         break;
                     case "move"://move[]
@@ -88,6 +89,22 @@ var conObj = {
                         changeFloor(myname,0,0,data[key][1],data[key][0]);
                         //alert("0x:"+data[key][1]+" 0y:"+data[key][0]);
                         //alert("x:"+playerObjArr[myname].x+" y:"+playerObjArr[myname].y);
+                        var color;
+                        switch(myname){
+                        	case 0:
+                        		color = "YELLOW";
+                        		break;
+                        	case 1:
+                        		color = "PURPLE";
+                        		break;
+                        	case 2:
+                        		color = "RED";
+                        		break;
+                        	case 3:
+                        		color = "BLUE";
+                        		break;
+                        }
+                        showOnScreen("You are team "+color+"!");
 
                         break;
                     case "error":

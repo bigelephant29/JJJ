@@ -19,6 +19,11 @@
  *   });
  *
  */
+@font-face {
+    font-family: '8bitfont'; /*a name to be used later*/
+    src: url('./PressStart2P.ttf'); /*URL to font*/
+}
+
 
 .linedwrap {
 	border: 1px solid #c0c0c0;
@@ -34,7 +39,7 @@
 .linedtextarea textarea, .linedwrap .codelines .lineno {
 	color: white;
 	font-size: 10pt;
-	font-family: monospace;
+	font-family: '8bitfont';
 	line-height: normal !important;
 }
 

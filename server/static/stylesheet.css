@@ -18,13 +18,21 @@ h1{
 #code{
     width: 50%;
     height: 105px;
+    font-family: '8bitfont';
 }
 
 #message{
     width: 50%;
     padding-top: 40px;
-    font-size: 40px;
+    font-size: 25px;
+    font-family: '8bitfont';
     color: #ff0000;
+}
+
+.Title{
+	color: #FFFFFF;
+	font-family: '8bitfont';
+    text-align: center;
 }
 
 .Main{
