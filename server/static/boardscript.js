@@ -353,12 +353,12 @@ function moveMe(me,left,mv){
                     console.log("[moveme]in x:"+me.x);
                     if(me.playerName == myname){
                         if(mv>0){        
-                            if((me.x % 30) == 29 ){
+                            if(((me.x % 30) == 29) && ((me.x / 30) < 2)){
                                 moveBoard(BoardObj,1,-30);
                             }
                         }
                         else{
-                            if((me.x % 30) == 0){
+                            if(((me.x % 30) == 0) && ((me.x / 30) >= 1)){
                                 moveBoard(BoardObj,1,30);
                             }
                         }
@@ -377,12 +377,12 @@ function moveMe(me,left,mv){
                     console.log("[moveme]in y:"+me.y);
                     if(me.playerName == myname){
                         if(mv>0){
-                            if((me.y % 15) == 14){
+                            if(((me.y % 15) == 14) && ((me.y / 15) < 2)){
                                 moveBoard(BoardObj,0,-15);
                             }
                         }
                         else{
-                            if((me.y % 15) == 0){
+                            if(((me.y % 15) == 0) && ((me.y / 15) >= 1)){
                                 moveBoard(BoardObj,0,15);
                             }
                         }
