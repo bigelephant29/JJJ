@@ -31,7 +31,7 @@ define("port", default=8888)
 MAX_USER = 2
 GAME_TIME = 300
 CLOCK_DELAY = 0.5
-PREPARE_TIME = 5
+PREPARE_TIME = 30
 
 GRASS1_PROB = [0, 1, 2]
 GRASS2_PROB = [3, 4, 5]
@@ -277,6 +277,9 @@ class userThread(threading.Thread):
 # render UI
 class UI(web.RequestHandler):
     def get(self):
+        if(Map.user_count >= MAX_USER):
+            return
+        
         self.render("index.html")
 
 # Interacte with client using websockethandler
