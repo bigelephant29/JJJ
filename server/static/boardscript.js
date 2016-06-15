@@ -392,18 +392,18 @@ function moveMe(me,left,mv){
     console.log(me.x+" "+me.y+"{{{{{{{moveMe}}}}}}"+left+" "+mv);
     if(left==1){
         if(me.x+mv >= 0 && me.x+mv <= 89){
-            console.log("hello.");
+            var tx = me.x;
             me.elem.animate({left:"+="+mv*32+"px"},{
             duration:'fast',start:function(){
                     console.log("[moveme]in x:"+me.x);
                     if(me.playerName == myname){
                         if(mv>0){        
-                            if(((me.x % 30) == 29) && ((me.x / 30) < 2)){
+                            if(((tx % 30) == 29) && ((tx / 30) < 2)){
                                 moveBoard(BoardObj,1,-30);
                             }
                         }
                         else{
-                            if(((me.x % 30) == 0) && ((me.x / 30) >= 1)){
+                            if(((tx % 30) == 0) && ((tx / 30) >= 1)){
                                 moveBoard(BoardObj,1,30);
                             }
                         }
@@ -416,18 +416,19 @@ function moveMe(me,left,mv){
     }
     else{
         if(me.y+mv >= 0 && me.y+mv <= 44){
+            var ty = me.y;
             me.elem.animate({top:"+="+mv*32+"px"},{
             duration:'fast',
                 start:function(){
                     console.log("[moveme]in y:"+me.y);
                     if(me.playerName == myname){
                         if(mv>0){
-                            if(((me.y % 15) == 14) && ((me.y / 15) < 2)){
+                            if(((ty % 15) == 14) && ((ty / 15) < 2)){
                                 moveBoard(BoardObj,0,-15);
                             }
                         }
                         else{
-                            if(((me.y % 15) == 0) && ((me.y / 15) >= 1)){
+                            if(((ty % 15) == 0) && ((ty / 15) >= 1)){
                                 moveBoard(BoardObj,0,15);
                             }
                         }
