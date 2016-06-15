@@ -429,7 +429,8 @@ def clock(delay):
             action[id] = Map.users[id].thread.getAction()
             if action[id] == None:
                 ids.append(id)
-
+        for id in ids:
+            action[id] = Map.users[id].thread.getAction()
         '''
         for user in Map.users:
             action[user] = Map.users[user].thread.getAction()
