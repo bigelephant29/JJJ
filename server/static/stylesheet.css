@@ -27,6 +27,7 @@ h1{
     font-size: 25px;
     font-family: '8bitfont';
     color: #ff0000;
+    border: 2px solid #c0c0c0;
 }
 
 .Title{
@@ -44,9 +45,8 @@ h1{
 .Window{
 	width:960px;
 	height:480px;
-	border-style: outset;
-    border-width: 5px;
-    border-color:#4e2d05;
+    border-width: 2px;
+    border-color:#c0c0c0;
     margin: auto;
 	overflow: hidden;
     /*position:absolute;
